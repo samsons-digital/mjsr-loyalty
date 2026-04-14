@@ -892,7 +892,7 @@
 
 <script>
 // ===== CONFIG =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrMvFCmcJXcqRqqzZq6rOUirhEYUYr4KGdqgltmH5brAf9BRIecTIoaodfNfw_Z3x_/exec';
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 let activeResort = 'MJSR';
 let foundMember  = null;
 let adminPIN     = '';
@@ -1367,10 +1367,11 @@ async function redeemWelcomeCode() {
     btn.disabled = false; btn.textContent = 'Redeem';
 
     if (res.ok) {
-      showAlert('visitAlert', 'success',
-        `Welcome code redeemed! ${res.name} — ${res.welcomeDiscount}% welcome discount applied. Visit #${res.totalVisits} logged (${res.visitID}).`);
+      // Show success first, then clear after delay so staff can read it
       clearVisitResult();
       document.getElementById('visitPhone').value = '';
+      showAlert('visitAlert', 'success',
+        `&#10003; Welcome code redeemed! ${res.name} — ${res.welcomeDiscount}% discount applied. Visit #${res.totalVisits} logged successfully (${res.visitID}).`);
     } else {
       showAlert('visitAlert', 'error', res.error);
     }
