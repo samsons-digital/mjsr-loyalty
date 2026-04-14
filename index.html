@@ -480,6 +480,13 @@
       </div>
     </div>
 
+    <div class="form-row full">
+      <div class="form-group">
+        <label>Email Address <span style="font-size:10px;color:rgba(245,243,238,0.35);font-weight:400;text-transform:none;letter-spacing:0;">optional — for visit notifications</span></label>
+        <input type="email" id="eEmail" placeholder="customer@example.com">
+      </div>
+    </div>
+
     <div class="form-row">
       <div class="form-group">
         <label>CNIC (optional)</label>
@@ -620,6 +627,19 @@
   </div>
 
   <div id="adminContent" style="display:none;">
+    <!-- QR Signup Links -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+      <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Self Sign-Up QR — MJSR</div>
+        <div id="qrMJSR" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+        <a href="signup-mjsr.html" target="_blank" style="color:rgba(245,243,238,0.6);font-size:11px;text-decoration:none;">signup-mjsr.html &#8599;</a>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:16px;text-align:center;">
+        <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Self Sign-Up QR — GV</div>
+        <div id="qrGV" style="display:flex;justify-content:center;margin-bottom:8px;"></div>
+        <a href="signup-gv.html" target="_blank" style="color:rgba(245,243,238,0.6);font-size:11px;text-decoration:none;">signup-gv.html &#8599;</a>
+      </div>
+    </div>
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('members')">Members</button>
       <button class="tab-btn" onclick="switchTab('visitlog')">Visit Log</button>
@@ -650,6 +670,103 @@
         <button class="btn btn-outline btn-sm" onclick="loadVisitLog()">Filter</button>
       </div>
       <div id="visitLogTable"></div>
+    </div>
+
+    <!-- Submissions Log Tab -->
+    <div class="tab-panel" id="tab-submissions">
+      <div id="subAlert"></div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+        <select id="subResort" class="staff-input" style="width:130px;margin-bottom:0;">
+          <option value="ALL">All Resorts</option>
+          <option value="MJSR">MJSR</option>
+          <option value="GV">GV</option>
+        </select>
+        <input type="date" id="subFrom" class="staff-input" style="width:140px;margin-bottom:0;">
+        <input type="date" id="subTo" class="staff-input" style="width:140px;margin-bottom:0;">
+        <button class="btn btn-outline btn-sm" onclick="loadSubmissions()">Filter</button>
+        <div style="flex:1;text-align:right;font-size:12px;color:rgba(245,243,238,0.4);" id="subCount"></div>
+      </div>
+      <div id="submissionsList"></div>
+    </div>
+
+    <!-- Edit Visit Modal -->
+    <div id="editVisitModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;">
+      <div style="background:#1e2f52;border:1px solid var(--gold);border-radius:14px;padding:28px;width:90%;max-width:480px;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:20px;">Edit Visit Record</div>
+        <div id="editVisitAlert"></div>
+        <input type="hidden" id="editVisitID">
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Activities</label>
+          <input type="text" id="editActivities" class="staff-input" style="margin-bottom:0;" placeholder="e.g. Chairlift, Skiing">
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Notes</label>
+          <input type="text" id="editNotes" class="staff-input" style="margin-bottom:0;">
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+          <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Staff Name</label>
+          <input type="text" id="editStaff" class="staff-input" style="margin-bottom:0;">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveVisitEdit()" style="flex:1;">Save Changes</button>
+          <button class="btn btn-outline" onclick="closeEditModal()" style="flex:1;">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Member Modal -->
+    <div id="editMemberModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;">
+      <div style="background:#1e2f52;border:1px solid var(--gold);border-radius:14px;padding:28px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:20px;">Edit Member Profile</div>
+        <div id="editMemberAlert"></div>
+        <input type="hidden" id="editMemberID">
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Name</label>
+            <input type="text" id="editMName" class="staff-input" style="margin-bottom:0;">
+          </div>
+          <div class="form-group">
+            <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Phone</label>
+            <input type="text" id="editMPhone" class="staff-input" style="margin-bottom:0;">
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Email</label>
+            <input type="email" id="editMEmail" class="staff-input" style="margin-bottom:0;">
+          </div>
+          <div class="form-group">
+            <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">CNIC</label>
+            <input type="text" id="editMCNIC" class="staff-input" style="margin-bottom:0;">
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom:12px;">
+          <div class="form-group">
+            <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Hometown</label>
+            <input type="text" id="editMHometown" class="staff-input" style="margin-bottom:0;">
+          </div>
+          <div class="form-group">
+            <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">District</label>
+            <input type="text" id="editMDistrict" class="staff-input" style="margin-bottom:0;">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Province</label>
+          <select id="editMProvince" class="staff-input" style="margin-bottom:0;">
+            <option value="">Select...</option>
+            <option>KPK</option><option>Punjab</option><option>Sindh</option>
+            <option>Balochistan</option><option>Gilgit-Baltistan</option><option>AJK</option><option>ICT</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:20px;">
+          <label style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:6px;">Notes</label>
+          <input type="text" id="editMNotes" class="staff-input" style="margin-bottom:0;">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary" onclick="saveMemberEdit()" style="flex:1;">Save Changes</button>
+          <button class="btn btn-outline" onclick="closeMemberModal()" style="flex:1;">Cancel</button>
+        </div>
+      </div>
     </div>
 
     <!-- Settings Tab -->
@@ -734,7 +851,7 @@
 
 <script>
 // ===== CONFIG =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbw0Bsa8vJAjVnhI290wwFzguxPZgfY8GeIIKTj17Bc-xxFF9sz56kA7VXblPkGDPNj2/exec';
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 let activeResort = 'MJSR';
 let foundMember  = null;
 let adminPIN     = '';
@@ -772,6 +889,7 @@ function switchTab(name) {
   event.target.classList.add('active');
   if (name === 'visitlog') loadVisitLog();
   if (name === 'settings') loadSettings();
+  if (name === 'submissions') loadSubmissions();
 }
 
 // ===== API =====
@@ -928,8 +1046,8 @@ async function enrollMember() {
     btn.disabled = false; btn.textContent = 'Enroll Member';
 
     if (res.ok) {
-      showAlert('enrollAlert', 'success', `Member enrolled! ID: ${res.memberID} — ${name} is now a Bronze member.`);
-      ['eName','ePhone','eCNIC','eHometown','eDistrict','eNotes','eStaff'].forEach(id => document.getElementById(id).value = '');
+      showAlert('enrollAlert', 'success', `Member enrolled! ID: ${res.memberID} — ${name} is now a Bronze member. Welcome code: ${res.signupCode}`);
+      ['eName','ePhone','eEmail','eCNIC','eHometown','eDistrict','eNotes','eStaff'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('eProvince').value = '';
     } else {
       showAlert('enrollAlert', 'error', res.error + (res.memberID ? ` (Existing ID: ${res.memberID})` : ''));
@@ -1074,6 +1192,7 @@ async function loadAdminMembers(page = 1) {
           </div>
           <span style="font-size:10px;color:${m.active==='Active'?'#4ade80':'#f87171'};margin-top:2px;">${m.active}</span>
         </div>
+        <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick='openEditMember(${JSON.stringify({memberID:m.memberID,name:m.name,phone:m.phone,email:m.email,cnic:m.cnic,hometown:m.hometown,district:m.district,province:m.province,notes:m.notes})})'>Edit Profile</button>
       </div>
     `).join('');
 
@@ -1227,8 +1346,172 @@ async function saveSettings() {
   }
 }
 
+
+// ===== QR CODES =====
+function generateQR(elementId, url) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  // Simple QR using a free API
+  const img = document.createElement('img');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}&bgcolor=1a2744&color=b8922e&margin=8`;
+  img.style.cssText = 'border-radius:8px;width:120px;height:120px;';
+  img.alt = 'QR Code';
+  el.appendChild(img);
+}
+
+function initQRCodes() {
+  const base = window.location.origin + window.location.pathname.replace('index.html','').replace(/\/+$/, '/');
+  generateQR('qrMJSR', base + 'signup-mjsr.html');
+  generateQR('qrGV',   base + 'signup-gv.html');
+}
+
+// ===== SUBMISSIONS LOG =====
+async function loadSubmissions() {
+  const resort   = document.getElementById('subResort').value;
+  const dateFrom = document.getElementById('subFrom').value;
+  const dateTo   = document.getElementById('subTo').value;
+
+  document.getElementById('submissionsList').innerHTML = '<div style="text-align:center;padding:20px;color:rgba(245,243,238,0.4);font-size:13px;"><span class="loader"></span> Loading...</div>';
+
+  try {
+    const res = await api({ action: 'VISIT_LOG', pin: adminPIN, resort, dateFrom, dateTo });
+    if (!res.ok) { document.getElementById('submissionsList').innerHTML = `<div style="color:#f87171;font-size:13px;">${res.error}</div>`; return; }
+
+    document.getElementById('subCount').textContent = `${res.total} record${res.total !== 1 ? 's' : ''}`;
+
+    if (res.logs.length === 0) {
+      document.getElementById('submissionsList').innerHTML = '<div style="text-align:center;color:rgba(245,243,238,0.4);padding:24px;font-size:13px;">No records found for this filter.</div>';
+      return;
+    }
+
+    const rows = res.logs.map(l => `
+      <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:9px;padding:14px 16px;margin-bottom:8px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:160px;">
+            <div style="font-weight:500;font-size:14px;">${l.name}</div>
+            <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">${l.phone} &nbsp;·&nbsp; ${l.visitID}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="color:${l.resort==='MJSR'?'var(--gold)':'#3b82f6'};font-size:12px;font-weight:600;">${l.resort}</span>
+            <span class="tier-badge tier-${l.tier.replace(' ','')} " style="font-size:10px;padding:3px 10px;">${l.tier}</span>
+            <span style="color:#4ade80;font-size:12px;font-weight:600;">${l.discount}</span>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:rgba(245,243,238,0.5);">
+          <span>&#128197; ${l.date}</span>
+          ${l.activities ? `<span>&#127931; ${l.activities}</span>` : ''}
+          ${l.staff ? `<span>&#128100; ${l.staff}</span>` : ''}
+          ${l.notes ? `<span>&#128172; ${l.notes}</span>` : ''}
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;">
+          <button class="btn btn-outline btn-sm" onclick="openEditVisit('${l.visitID}','${(l.activities||'').replace(/'/g,"\'")}','${(l.notes||'').replace(/'/g,"\'")}','${(l.staff||'').replace(/'/g,"\'")}')">Edit</button>
+          <button class="btn btn-sm" style="background:rgba(192,57,43,0.2);color:#f87171;border:1px solid rgba(192,57,43,0.4);" onclick="confirmDeleteVisit('${l.visitID}','${l.name.replace(/'/g,"\'")}')">Delete</button>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('submissionsList').innerHTML = rows;
+  } catch(e) {
+    document.getElementById('submissionsList').innerHTML = '<div style="color:#f87171;font-size:13px;">Connection error.</div>';
+  }
+}
+
+// ===== EDIT VISIT =====
+function openEditVisit(visitID, activities, notes, staff) {
+  document.getElementById('editVisitID').value     = visitID;
+  document.getElementById('editActivities').value  = activities;
+  document.getElementById('editNotes').value        = notes;
+  document.getElementById('editStaff').value        = staff;
+  document.getElementById('editVisitAlert').innerHTML = '';
+  document.getElementById('editVisitModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('editVisitModal').style.display = 'none';
+}
+
+async function saveVisitEdit() {
+  const visitID    = document.getElementById('editVisitID').value;
+  const activities = document.getElementById('editActivities').value;
+  const notes      = document.getElementById('editNotes').value;
+  const staff      = document.getElementById('editStaff').value;
+
+  try {
+    const res = await api({ action: 'EDIT_VISIT', pin: adminPIN, visitID, activities, notes, staff });
+    if (res.ok) {
+      closeEditModal();
+      loadSubmissions();
+      showAlert('subAlert', 'success', `Visit ${visitID} updated successfully.`);
+    } else {
+      document.getElementById('editVisitAlert').innerHTML = `<div class="alert alert-error">${res.error}</div>`;
+    }
+  } catch(e) {
+    document.getElementById('editVisitAlert').innerHTML = '<div class="alert alert-error">Connection error.</div>';
+  }
+}
+
+async function confirmDeleteVisit(visitID, memberName) {
+  if (!confirm(`Delete visit ${visitID} for ${memberName}?\n\nThis cannot be undone.`)) return;
+  try {
+    const res = await api({ action: 'DELETE_VISIT', pin: adminPIN, visitID });
+    if (res.ok) {
+      loadSubmissions();
+      showAlert('subAlert', 'success', `Visit ${visitID} deleted.`);
+    } else {
+      showAlert('subAlert', 'error', res.error);
+    }
+  } catch(e) {
+    showAlert('subAlert', 'error', 'Connection error.');
+  }
+}
+
+// ===== EDIT MEMBER =====
+function openEditMember(m) {
+  document.getElementById('editMemberID').value    = m.memberID;
+  document.getElementById('editMName').value       = m.name;
+  document.getElementById('editMPhone').value      = m.phone;
+  document.getElementById('editMEmail').value      = m.email || '';
+  document.getElementById('editMCNIC').value       = m.cnic || '';
+  document.getElementById('editMHometown').value   = m.hometown || '';
+  document.getElementById('editMDistrict').value   = m.district || '';
+  document.getElementById('editMProvince').value   = m.province || '';
+  document.getElementById('editMNotes').value      = m.notes || '';
+  document.getElementById('editMemberAlert').innerHTML = '';
+  document.getElementById('editMemberModal').style.display = 'flex';
+}
+
+function closeMemberModal() {
+  document.getElementById('editMemberModal').style.display = 'none';
+}
+
+async function saveMemberEdit() {
+  const memberID = document.getElementById('editMemberID').value;
+  try {
+    const res = await api({
+      action: 'EDIT_MEMBER', pin: adminPIN, memberID,
+      name:     document.getElementById('editMName').value,
+      phone:    document.getElementById('editMPhone').value,
+      email:    document.getElementById('editMEmail').value,
+      cnic:     document.getElementById('editMCNIC').value,
+      hometown: document.getElementById('editMHometown').value,
+      district: document.getElementById('editMDistrict').value,
+      province: document.getElementById('editMProvince').value,
+      notes:    document.getElementById('editMNotes').value,
+    });
+    if (res.ok) {
+      closeMemberModal();
+      loadAdminMembers(adminPage);
+      showAlert('subAlert', 'success', 'Member profile updated.');
+    } else {
+      document.getElementById('editMemberAlert').innerHTML = `<div class="alert alert-error">${res.error}</div>`;
+    }
+  } catch(e) {
+    document.getElementById('editMemberAlert').innerHTML = '<div class="alert alert-error">Connection error.</div>';
+  }
+}
+
 // init
 buildActivities();
+initQRCodes();
 </script>
 </body>
 </html>
