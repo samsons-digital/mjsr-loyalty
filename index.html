@@ -335,6 +335,12 @@
   }
   .confirm-panel.show { display: block; }
 
+
+  .sw-on { background: var(--gold) !important; }
+  .sw-on::after { transform: translateX(18px) !important; }
+  span[id^="sw_"] { display: block; }
+  span[id^="sw_"]::after { content:''; position:absolute; height:18px; width:18px; left:3px; bottom:3px; background:white; border-radius:50%; transition:0.3s; }
+
   @media (max-width: 680px) {
     .stats-grid { grid-template-columns: 1fr 1fr; }
     .charts-grid { grid-template-columns: 1fr; }
@@ -875,6 +881,59 @@
         </div>
       </div>
 
+
+      <!-- Email Notifications -->
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Email Notifications</div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">Control which automated emails are sent to customers. Changes take effect immediately.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:500;">Welcome Email</div>
+              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Sent on new member signup</div>
+            </div>
+            <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
+              <input type="checkbox" id="cfg_emailWelcome" style="opacity:0;width:0;height:0;">
+              <span onclick="toggleSwitch('cfg_emailWelcome')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailWelcome"></span>
+            </label>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:500;">Post-Visit Email</div>
+              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Progress update after each visit</div>
+            </div>
+            <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
+              <input type="checkbox" id="cfg_emailPostVisit" style="opacity:0;width:0;height:0;">
+              <span onclick="toggleSwitch('cfg_emailPostVisit')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailPostVisit"></span>
+            </label>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:500;">Tier Upgrade Email</div>
+              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Sent when member reaches new tier</div>
+            </div>
+            <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
+              <input type="checkbox" id="cfg_emailTierUpgrade" style="opacity:0;width:0;height:0;">
+              <span onclick="toggleSwitch('cfg_emailTierUpgrade')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailTierUpgrade"></span>
+            </label>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <div>
+              <div style="font-size:13px;font-weight:500;">Welcome Discount</div>
+              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Enable one-time welcome code at gate</div>
+            </div>
+            <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
+              <input type="checkbox" id="cfg_emailWelcomeDiscount" style="opacity:0;width:0;height:0;">
+              <span onclick="toggleSwitch('cfg_emailWelcomeDiscount')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailWelcomeDiscount"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Preview -->
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;" id="tierPreviewCard">
         <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">Live Preview</div>
@@ -892,7 +951,7 @@
 
 <script>
 // ===== CONFIG =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrMvFCmcJXcqRqqzZq6rOUirhEYUYr4KGdqgltmH5brAf9BRIecTIoaodfNfw_Z3x_/exec';
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 let activeResort = 'MJSR';
 let foundMember  = null;
 let adminPIN     = '';
@@ -1011,7 +1070,7 @@ function showMemberResult(m) {
   // Welcome code panel
   const wPanel = document.getElementById('welcomeCodePanel');
   const wUsed  = document.getElementById('welcomeUsedBanner');
-  if (m.signupUsed === false) {
+  if (m.signupUsed === false && m.welcomeDiscountEnabled !== false) {
     wPanel.style.display = 'block';
     wUsed.style.display  = 'none';
   } else if (m.signupUsed === true) {
@@ -1382,6 +1441,19 @@ async function redeemWelcomeCode() {
 }
 
 // ===== SETTINGS =====
+function toggleSwitch(id) {
+  const cb = document.getElementById(id);
+  const sw = document.getElementById('sw_' + id.replace('cfg_',''));
+  cb.checked = !cb.checked;
+  sw.classList.toggle('sw-on', cb.checked);
+}
+
+function setSwitch(id, val) {
+  const cb = document.getElementById(id);
+  const sw = document.getElementById('sw_' + id.replace('cfg_',''));
+  if (cb && sw) { cb.checked = val; sw.classList.toggle('sw-on', val); }
+}
+
 async function loadSettings() {
   try {
     const res = await api({ action: 'GET_CONFIG', pin: adminPIN });
@@ -1393,6 +1465,12 @@ async function loadSettings() {
     document.getElementById('cfg_goldMin').value        = res.gold.min;
     document.getElementById('cfg_goldDiscount').value   = res.gold.discount;
     if (res.welcomeDiscount !== undefined) document.getElementById('cfg_welcomeDiscount').value = res.welcomeDiscount;
+    if (res.emailConfig) {
+      setSwitch('cfg_emailWelcome',         res.emailConfig.welcome);
+      setSwitch('cfg_emailPostVisit',       res.emailConfig.postVisit);
+      setSwitch('cfg_emailTierUpgrade',     res.emailConfig.tierUpgrade);
+      setSwitch('cfg_emailWelcomeDiscount', res.emailConfig.welcomeDiscount);
+    }
     updateTierPreview(res);
   } catch(e) { showAlert('settingsAlert', 'error', 'Could not load settings.'); }
 }
@@ -1430,7 +1508,11 @@ async function saveSettings() {
       silverMin:      document.getElementById('cfg_silverMin').value,
       goldMin:        document.getElementById('cfg_goldMin').value,
       bronzeDiscount:  document.getElementById('cfg_bronzeDiscount').value,
-      welcomeDiscount: document.getElementById('cfg_welcomeDiscount') ? document.getElementById('cfg_welcomeDiscount').value : 10,
+      welcomeDiscount:        document.getElementById('cfg_welcomeDiscount') ? document.getElementById('cfg_welcomeDiscount').value : 10,
+      emailWelcome:           document.getElementById('cfg_emailWelcome') ? document.getElementById('cfg_emailWelcome').checked : true,
+      emailPostVisit:         document.getElementById('cfg_emailPostVisit') ? document.getElementById('cfg_emailPostVisit').checked : true,
+      emailTierUpgrade:       document.getElementById('cfg_emailTierUpgrade') ? document.getElementById('cfg_emailTierUpgrade').checked : true,
+      emailWelcomeDiscount:   document.getElementById('cfg_emailWelcomeDiscount') ? document.getElementById('cfg_emailWelcomeDiscount').checked : true,
       silverDiscount: document.getElementById('cfg_silverDiscount').value,
       goldDiscount:   document.getElementById('cfg_goldDiscount').value,
     });
