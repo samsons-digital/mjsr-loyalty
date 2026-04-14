@@ -454,6 +454,27 @@
         </div>
       </div>
 
+      <!-- Welcome Code Redemption -->
+      <div id="welcomeCodePanel" style="display:none;background:linear-gradient(135deg,rgba(26,107,74,0.15),rgba(26,107,74,0.08));border:1px solid rgba(74,222,128,0.4);border-radius:10px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <div style="width:10px;height:10px;border-radius:50%;background:#4ade80;flex-shrink:0;box-shadow:0 0 8px #4ade80;"></div>
+          <div style="font-size:13px;font-weight:600;color:#4ade80;">Welcome Code Available</div>
+          <div style="font-size:11px;color:rgba(245,243,238,0.5);margin-left:auto;">One-time use</div>
+        </div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.6);margin-bottom:12px;line-height:1.5;">
+          This member has an unused welcome discount. You can redeem it now by entering their code, or click <strong style="color:#4ade80;">Redeem by Lookup</strong> since they are already verified by phone.
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" id="welcomeCodeInput" placeholder="WELCOME-00000-XXXX (optional)" style="flex:1;padding:9px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(74,222,128,0.3);border-radius:7px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;text-transform:uppercase;">
+          <button class="btn btn-sm" style="background:rgba(26,107,74,0.3);color:#4ade80;border:1px solid rgba(74,222,128,0.4);white-space:nowrap;" onclick="redeemWelcomeCode()">Redeem</button>
+        </div>
+        <div style="font-size:11px;color:rgba(245,243,238,0.4);text-align:center;">Welcome discount: <strong id="welcomeDiscountPct" style="color:#4ade80;">10%</strong> off all activities</div>
+      </div>
+
+      <div id="welcomeUsedBanner" style="display:none;background:rgba(107,114,128,0.1);border:1px solid rgba(107,114,128,0.3);border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+        <div style="font-size:12px;color:rgba(245,243,238,0.4);">&#10003; Welcome code already redeemed on a previous visit.</div>
+      </div>
+
       <button class="btn btn-primary" onclick="submitVisit()" id="submitVisitBtn" style="width:100%;">Confirm &amp; Log Visit</button>
     </div>
   </div>
@@ -834,6 +855,26 @@
         </div>
       </div>
 
+
+      <!-- Welcome Discount Setting -->
+      <div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.25);border-radius:10px;padding:22px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:500;color:#4ade80;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Welcome Discount</div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">The one-time discount applied when a new member redeems their welcome code at the gate. Applies to all activities.</div>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:center;">
+          <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:18px;text-align:center;">
+            <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:8px;">Welcome Discount %</label>
+            <input type="number" id="cfg_welcomeDiscount" min="0" max="100" step="0.5" value="10"
+              style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(74,222,128,0.4);border-radius:6px;color:#4ade80;font-family:'DM Sans',sans-serif;font-size:22px;text-align:center;font-weight:700;">
+          </div>
+          <div style="font-size:12px;color:rgba(245,243,238,0.5);line-height:1.7;">
+            <div style="margin-bottom:6px;">&#9679; Applied on the member's <strong style="color:var(--cream);">first visit only</strong></div>
+            <div style="margin-bottom:6px;">&#9679; Shown automatically at gate when staff looks up phone</div>
+            <div style="margin-bottom:6px;">&#9679; Staff can verify with code or redeem by phone lookup</div>
+            <div>&#9679; Marked as used in sheet after redemption — cannot be redeemed twice</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Preview -->
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;" id="tierPreviewCard">
         <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">Live Preview</div>
@@ -851,7 +892,7 @@
 
 <script>
 // ===== CONFIG =====
-const GAS_URL = 'https://script.google.com/macros/s/AKfycby6Oxx2nDcPHe0TKWORobL8aDDCgf1vhyz5kXdVNSt0jMGN3cRAMbhGhfb8nprENRjs/exec';
+const GAS_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
 let activeResort = 'MJSR';
 let foundMember  = null;
 let adminPIN     = '';
@@ -925,6 +966,14 @@ async function lookupForVisit() {
     buildActivities();
     clearAlert('visitAlert');
 
+    // Update welcome discount display in panel
+    api({ action: 'GET_CONFIG', pin: '' }).then(cfg => {
+      if (cfg && cfg.welcomeDiscount !== undefined) {
+        const el = document.getElementById('welcomeDiscountPct');
+        if (el) el.textContent = cfg.welcomeDiscount + '%';
+      }
+    }).catch(()=>{});
+
   } catch(e) {
     btn.textContent = 'Look Up';
     showAlert('visitAlert', 'error', 'Connection error. Check Apps Script URL.');
@@ -958,6 +1007,20 @@ function showMemberResult(m) {
   }
   document.getElementById('rDiscountPct').textContent = m.discount + '%';
   document.getElementById('rTierLabel').textContent = m.tier + ' member — visit #' + (m.resortVisits + 1) + ' at ' + activeResort;
+
+  // Welcome code panel
+  const wPanel = document.getElementById('welcomeCodePanel');
+  const wUsed  = document.getElementById('welcomeUsedBanner');
+  if (m.signupUsed === false) {
+    wPanel.style.display = 'block';
+    wUsed.style.display  = 'none';
+  } else if (m.signupUsed === true) {
+    wPanel.style.display = 'none';
+    wUsed.style.display  = 'block';
+  } else {
+    wPanel.style.display = 'none';
+    wUsed.style.display  = 'none';
+  }
 }
 
 function clearVisitResult() {
@@ -1280,6 +1343,43 @@ function showAlert(id, type, msg) {
 function clearAlert(id) { document.getElementById(id).innerHTML = ''; }
 
 
+
+// ===== WELCOME CODE REDEMPTION =====
+async function redeemWelcomeCode() {
+  if (!foundMember) return;
+  const code       = document.getElementById('welcomeCodeInput').value.trim();
+  const activities = [...document.querySelectorAll('#activitiesGrid input:checked')].map(i => i.value);
+  const staff      = document.getElementById('visitStaff').value.trim();
+  const notes      = document.getElementById('visitNotes').value.trim();
+
+  const btn = document.querySelector('#welcomeCodePanel button');
+  btn.disabled = true; btn.textContent = 'Redeeming...';
+
+  try {
+    const res = await api({
+      action: 'REDEEM_WELCOME',
+      memberID:   foundMember.memberID,
+      visitCode:  code,
+      resort:     activeResort,
+      activities, notes, staff
+    });
+
+    btn.disabled = false; btn.textContent = 'Redeem';
+
+    if (res.ok) {
+      showAlert('visitAlert', 'success',
+        `Welcome code redeemed! ${res.name} — ${res.welcomeDiscount}% welcome discount applied. Visit #${res.totalVisits} logged (${res.visitID}).`);
+      clearVisitResult();
+      document.getElementById('visitPhone').value = '';
+    } else {
+      showAlert('visitAlert', 'error', res.error);
+    }
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Redeem';
+    showAlert('visitAlert', 'error', 'Connection error.');
+  }
+}
+
 // ===== SETTINGS =====
 async function loadSettings() {
   try {
@@ -1291,6 +1391,7 @@ async function loadSettings() {
     document.getElementById('cfg_silverDiscount').value = res.silver.discount;
     document.getElementById('cfg_goldMin').value        = res.gold.min;
     document.getElementById('cfg_goldDiscount').value   = res.gold.discount;
+    if (res.welcomeDiscount !== undefined) document.getElementById('cfg_welcomeDiscount').value = res.welcomeDiscount;
     updateTierPreview(res);
   } catch(e) { showAlert('settingsAlert', 'error', 'Could not load settings.'); }
 }
@@ -1327,7 +1428,8 @@ async function saveSettings() {
       bronzeMin:      document.getElementById('cfg_bronzeMin').value,
       silverMin:      document.getElementById('cfg_silverMin').value,
       goldMin:        document.getElementById('cfg_goldMin').value,
-      bronzeDiscount: document.getElementById('cfg_bronzeDiscount').value,
+      bronzeDiscount:  document.getElementById('cfg_bronzeDiscount').value,
+      welcomeDiscount: document.getElementById('cfg_welcomeDiscount') ? document.getElementById('cfg_welcomeDiscount').value : 10,
       silverDiscount: document.getElementById('cfg_silverDiscount').value,
       goldDiscount:   document.getElementById('cfg_goldDiscount').value,
     });
