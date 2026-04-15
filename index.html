@@ -442,11 +442,21 @@
 
     <!-- Confirm Visit Panel -->
     <div class="confirm-panel" id="confirmPanel">
-      <div style="font-size:13px; color:var(--gold); font-weight:500; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:14px;">Log This Visit</div>
+      <div style="font-size:13px; color:var(--gold); font-weight:500; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:14px;">Log This Visit — Manual Entry</div>
 
       <div style="margin-bottom:14px">
         <label style="font-size:11px; color:var(--gold); text-transform:uppercase; letter-spacing:0.8px; display:block; margin-bottom:8px;">Activities Used</label>
+        <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-bottom:10px;">Tick each activity. Prices auto-fill from the current season. Points are calculated from the total amount.</div>
         <div class="activities-grid" id="activitiesGrid"></div>
+      </div>
+
+      <!-- Invoice Total -->
+      <div id="invoiceTotalRow" style="display:none;background:rgba(184,146,46,0.08);border:1px solid rgba(184,146,46,0.25);border-radius:8px;padding:12px 16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:12px;color:rgba(245,243,238,0.6);">Invoice Total</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);">PKR <span id="invoiceTotalAmt">0</span></div>
+        </div>
+        <div style="font-size:11px;color:#4ade80;margin-top:4px;text-align:right;" id="invoicePointsPreview"></div>
       </div>
 
       <div class="form-row" style="margin-bottom:14px">
@@ -1070,6 +1080,9 @@ async function lookupForVisit() {
     buildActivities();
     clearAlert('visitAlert');
 
+    // Load activity prices for manual entry
+    loadActivityPrices().then(() => buildActivities());
+
     // Update welcome discount display in panel
     api({ action: 'GET_CONFIG', pin: '' }).then(cfg => {
       if (cfg && cfg.welcomeDiscount !== undefined) {
@@ -1134,27 +1147,82 @@ function clearVisitResult() {
   clearAlert('visitAlert');
 }
 
+// Activity price cache loaded from GAS
+let activityPriceCache = {};
+
+async function loadActivityPrices() {
+  const acts = ACTIVITIES[activeResort] || ACTIVITIES.MJSR;
+  activityPriceCache = {};
+  for (const a of acts) {
+    try {
+      const res = await api({ action: 'GET_ACTIVITY_PRICE', activity: a });
+      if (res.ok) activityPriceCache[a] = res.price || 0;
+    } catch(e) { activityPriceCache[a] = 0; }
+  }
+}
+
 function buildActivities() {
   const grid = document.getElementById('activitiesGrid');
   const acts = ACTIVITIES[activeResort] || ACTIVITIES.MJSR;
   grid.innerHTML = '';
+  // Override grid to 1 col for the expanded rows
+  grid.style.gridTemplateColumns = '1fr';
+
   for (const a of acts) {
+    const price = activityPriceCache[a] || 0;
     const div = document.createElement('div');
     div.className = 'activity-check';
-    div.innerHTML = `<input type="checkbox" id="act_${a}" value="${a}"><label for="act_${a}" class="activity-label">${a}</label>`;
-    div.querySelector('input').addEventListener('change', function() {
+    div.style.cssText = 'flex-direction:row;align-items:center;justify-content:space-between;padding:10px 14px;';
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;flex:1;">
+        <input type="checkbox" id="act_${a}" value="${a}">
+        <label for="act_${a}" class="activity-label" style="cursor:pointer;">${a}</label>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:rgba(245,243,238,0.4);">PKR</span>
+        <input type="number" id="amt_${a}" value="${price}" min="0"
+          style="width:90px;padding:5px 8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:var(--gold);font-family:'DM Sans',sans-serif;font-size:13px;text-align:center;"
+          oninput="updateInvoiceTotal()">
+      </div>`;
+    const cb = div.querySelector('input[type=checkbox]');
+    cb.addEventListener('change', function() {
       div.classList.toggle('selected', this.checked);
+      updateInvoiceTotal();
     });
     grid.appendChild(div);
+  }
+  updateInvoiceTotal();
+}
+
+function updateInvoiceTotal() {
+  const checked = [...document.querySelectorAll('#activitiesGrid input[type=checkbox]:checked')];
+  let total = 0;
+  for (const cb of checked) {
+    const amtEl = document.getElementById('amt_' + cb.value);
+    if (amtEl) total += parseFloat(amtEl.value) || 0;
+  }
+  const totalRow = document.getElementById('invoiceTotalRow');
+  const totalAmt = document.getElementById('invoiceTotalAmt');
+  const ptsPreview = document.getElementById('invoicePointsPreview');
+  if (totalRow && totalAmt) {
+    totalRow.style.display = checked.length > 0 ? 'block' : 'none';
+    totalAmt.textContent = total.toLocaleString();
+    if (ptsPreview) ptsPreview.textContent = total > 0 ? '= ' + Math.round(total).toLocaleString() + ' points to be awarded' : '';
   }
 }
 
 async function submitVisit() {
   if (!foundMember) return;
 
-  const activities = [...document.querySelectorAll('#activitiesGrid input:checked')].map(i => i.value);
+  const checkedActs = [...document.querySelectorAll('#activitiesGrid input[type=checkbox]:checked')];
+  const activities  = checkedActs.map(i => i.value);
+  let totalAmount   = 0;
+  for (const cb of checkedActs) {
+    const amtEl = document.getElementById('amt_' + cb.value);
+    if (amtEl) totalAmount += parseFloat(amtEl.value) || 0;
+  }
   const staff = document.getElementById('visitStaff').value.trim();
-  const notes = document.getElementById('visitNotes').value.trim();
+  const notes = (document.getElementById('visitNotes').value.trim() ? document.getElementById('visitNotes').value.trim() + ' ' : '') + '(Manual Entry)';
   const btn = document.getElementById('submitVisitBtn');
 
   btn.disabled = true;
@@ -1167,6 +1235,7 @@ async function submitVisit() {
       phone: foundMember.phone,
       resort: activeResort,
       activities,
+      amountPKR: totalAmount,
       notes,
       staff
     });
@@ -1175,8 +1244,10 @@ async function submitVisit() {
     btn.textContent = 'Confirm & Log Visit';
 
     if (res.ok) {
+      const ptsTxt = res.pointsEarned > 0 ? ` +${res.pointsEarned.toLocaleString()} pts earned.` : '';
+      const upgTxt = res.upgraded ? ` 🎉 Tier upgraded to ${res.tier}!` : '';
       showAlert('visitAlert', 'success',
-        `Visit logged! ${res.name} — ${res.tier} tier — ${res.discount}% discount applied. Visit #${res.totalVisits} at ${activeResort} (ID: ${res.visitID})`);
+        `Visit logged! ${res.name} — ${res.tier} tier — ${res.discount}% discount.${ptsTxt}${upgTxt} Total: ${(res.totalPoints||0).toLocaleString()} pts. (${res.visitID})`);
       clearVisitResult();
       document.getElementById('visitPhone').value = '';
     } else {
