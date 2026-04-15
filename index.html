@@ -803,21 +803,16 @@
     <div class="tab-panel" id="tab-prices">
       <div id="pricesAlert"></div>
 
-      <!-- Season Settings -->
+      <!-- Season Toggle -->
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:20px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">High Season Dates</div>
-        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:16px;">Define when High Season pricing applies. Format: MM-DD (e.g. 12-15 for 15 December).</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;">
-          <div class="form-group">
-            <label>High Season Start (MM-DD)</label>
-            <input type="text" id="hsStart" placeholder="12-15" class="staff-input" style="margin-bottom:0;">
-          </div>
-          <div class="form-group">
-            <label>High Season End (MM-DD)</label>
-            <input type="text" id="hsEnd" placeholder="02-28" class="staff-input" style="margin-bottom:0;">
-          </div>
+        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Active Season</div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:16px;">Select the current season. This controls which prices apply on all activity check-in pages immediately. Weekend surcharge is always applied automatically on top.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;" id="seasonToggleGrid">
+          <!-- Populated by JS -->
         </div>
-        <div id="currentSeasonDisplay" style="font-size:12px;color:rgba(245,243,238,0.5);padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:6px;"></div>
+
+        <div id="currentSeasonDisplay" style="font-size:12px;padding:10px 14px;background:rgba(184,146,46,0.08);border:1px solid rgba(184,146,46,0.25);border-radius:8px;"></div>
       </div>
 
       <!-- Price Matrix -->
@@ -1504,21 +1499,69 @@ const PRICE_ACTIVITIES = [
 ];
 const PRICE_SUFFIXES = ['WD_L','WE_L','WD_H','WE_H'];
 
+const SEASONS_META = [
+  { key:'summer_peak',    label:'Summer Peak',           type:'peak',    dates:'1 Jun — 31 Aug',          emoji:'☀️' },
+  { key:'summer_offpeak', label:'Summer Off-Peak',        type:'offpeak', dates:'1 Sep — 14 Dec',           emoji:'🍂' },
+  { key:'winter_peak',    label:'Winter Peak',            type:'peak',    dates:'15 Dec — Ramadan Start',   emoji:'❄️' },
+  { key:'winter_eid',     label:'Winter 2nd Peak (Eid)',  type:'peak',    dates:'Eid window ~10-14 days',   emoji:'🌙' },
+  { key:'autumn_offpeak', label:'Autumn Off-Peak',        type:'offpeak', dates:'Post-Eid — 31 May',        emoji:'🌿' },
+];
+
+let currentActiveSeason = 'summer_offpeak';
+
+function buildSeasonToggle(activeSeason) {
+  currentActiveSeason = activeSeason;
+  const grid = document.getElementById('seasonToggleGrid');
+  grid.innerHTML = '';
+  SEASONS_META.forEach(s => {
+    const isPeak   = s.type === 'peak';
+    const isActive = s.key === activeSeason;
+    const div = document.createElement('div');
+    div.style.cssText = `padding:14px;border-radius:10px;cursor:pointer;border:2px solid ${isActive ? (isPeak ? 'var(--gold)' : '#3b82f6') : 'rgba(255,255,255,0.08)'};background:${isActive ? (isPeak ? 'rgba(184,146,46,0.12)' : 'rgba(59,130,246,0.1)') : 'rgba(255,255,255,0.03)'};transition:all 0.2s;`;
+    div.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:14px;">${s.emoji}</span>
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;text-transform:uppercase;letter-spacing:0.8px;background:${isPeak ? 'rgba(184,146,46,0.2)' : 'rgba(59,130,246,0.2)'};color:${isPeak ? 'var(--gold-light)' : '#60a5fa'};">${isPeak ? 'Peak' : 'Off-Peak'}</span>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:${isActive ? 'var(--cream)' : 'rgba(245,243,238,0.6)'};">${s.label}</div>
+      <div style="font-size:11px;color:rgba(245,243,238,0.35);margin-top:3px;">${s.dates}</div>
+      ${isActive ? '<div style="font-size:11px;color:#4ade80;margin-top:6px;font-weight:600;">✓ Currently Active</div>' : ''}
+    `;
+    div.onclick = () => selectSeason(s.key);
+    grid.appendChild(div);
+  });
+}
+
+function selectSeason(key) {
+  currentActiveSeason = key;
+  buildSeasonToggle(key);
+  const season = SEASONS_META.find(s => s.key === key);
+  updateSeasonDisplay(season);
+}
+
+function updateSeasonDisplay(season) {
+  const isPeak = season.type === 'peak';
+  const col    = isPeak ? 'WD_H' : 'WD_L';
+  ['WD_L','WE_L','WD_H','WE_H'].forEach(sfx => {
+    const th = document.getElementById('th_' + sfx);
+    if (th) {
+      const isActive = (isPeak && sfx.endsWith('H')) || (!isPeak && sfx.endsWith('L'));
+      th.style.background = isActive ? 'rgba(184,146,46,0.15)' : 'transparent';
+    }
+  });
+  const disp = document.getElementById('currentSeasonDisplay');
+  disp.innerHTML = `<strong style="color:${isPeak ? 'var(--gold)' : '#60a5fa'};">${season.label}</strong> is active — check-in pages are using <strong>${isPeak ? 'Peak' : 'Off-Peak'}</strong> prices. Weekend surcharge columns (WE) apply automatically on Fri/Sat/Sun.`;
+}
+
 async function loadPrices() {
   try {
     const res = await api({ action:'GET_PRICES', pin: adminPIN });
     if (!res.ok) { showAlert('pricesAlert','error',res.error); return; }
 
-    document.getElementById('hsStart').value = res.highSeasonStart || '12-15';
-    document.getElementById('hsEnd').value   = res.highSeasonEnd   || '02-28';
-    // Highlight active column
-    const activeSuffix = (res.currentDayType === 'Weekend' ? 'WE' : 'WD') + '_' + (res.currentSeason === 'High Season' ? 'H' : 'L');
-    ['WD_L','WE_L','WD_H','WE_H'].forEach(sfx => {
-      const th = document.getElementById('th_' + sfx);
-      if (th) th.style.background = sfx === activeSuffix ? 'rgba(184,146,46,0.15)' : 'transparent';
-    });
-    document.getElementById('currentSeasonDisplay').textContent =
-      'Active now: ' + res.currentSeason + ' · ' + res.currentDayType + ' — check-in pages are using the highlighted column prices.';
+    buildSeasonToggle(res.activeSeason || 'summer_offpeak');
+    const season = SEASONS_META.find(s => s.key === (res.activeSeason || 'summer_offpeak'));
+    if (season) updateSeasonDisplay(season);
+
 
     // Build price table
     const tbody = document.getElementById('priceTableBody');
@@ -1566,8 +1609,7 @@ async function savePrices() {
     const res = await api({
       action: 'SAVE_PRICES', pin: adminPIN,
       prices,
-      highSeasonStart: document.getElementById('hsStart').value.trim(),
-      highSeasonEnd:   document.getElementById('hsEnd').value.trim(),
+      activeSeason: currentActiveSeason,
     });
     btn.disabled = false; btn.textContent = 'Save Prices';
     if (res.ok) showAlert('pricesAlert','success','Prices saved. Changes take effect immediately on all activity check-in pages.');

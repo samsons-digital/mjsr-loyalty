@@ -256,7 +256,7 @@ async function loadCurrentPrice() {
     if (data.ok && data.price > 0) {
       document.getElementById('amountInput').value = data.price;
       document.getElementById('priceDisplay_amount').textContent = 'PKR ' + data.price.toLocaleString();
-      document.getElementById('priceSeasonLabel').textContent    = data.seasonType;
+      document.getElementById('priceSeasonLabel').textContent    = data.seasonLabel || data.seasonType;
       document.getElementById('priceDayLabel').textContent       = data.dayType;
       updatePointsPreview();
     } else {
