@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Activity Check-In — MJSR & GV Loyalty</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root { --gold:#b8922e; --gold-light:#d4aa50; --navy:#1a2744; --navy-mid:#1e2f52; --cream:#f5f3ee; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family:'DM Sans',sans-serif;
+    background:linear-gradient(160deg,#0d1a2e 0%,var(--navy) 50%,#1e2f52 100%);
+    min-height:100vh; color:var(--cream);
+    display:flex; flex-direction:column; align-items:center; padding:0 16px 40px;
+  }
+
+  .header { width:100%;max-width:440px;padding:24px 0 16px;text-align:center;border-bottom:1px solid rgba(184,146,46,0.2);margin-bottom:28px; }
+  .header-brand { font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);letter-spacing:1px; }
+  .header-sub { font-size:11px;color:rgba(245,243,238,0.4);letter-spacing:2px;text-transform:uppercase;margin-top:3px; }
+
+  .resort-badge { display:inline-block;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-top:8px; }
+  .resort-mjsr { background:rgba(184,146,46,0.15);border:1px solid rgba(184,146,46,0.4);color:var(--gold-light); }
+  .resort-gv   { background:rgba(45,125,210,0.15);border:1px solid rgba(45,125,210,0.4);color:#60a5fa; }
+
+  .activity-badge { width:100%;max-width:440px;background:linear-gradient(135deg,rgba(184,146,46,0.12),rgba(184,146,46,0.05));border:1px solid rgba(184,146,46,0.35);border-radius:16px;padding:24px;text-align:center;margin-bottom:20px; }
+  .activity-icon { width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:26px; }
+  .activity-label { font-size:11px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px; }
+  .activity-name { font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:var(--cream); }
+
+  .form-card { width:100%;max-width:440px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:14px;padding:22px;margin-bottom:16px; }
+  .form-label { font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.9px;display:block;margin-bottom:8px; }
+  .phone-input { width:100%;padding:14px 16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:10px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:22px;text-align:center;letter-spacing:2px;transition:border-color 0.2s;margin-bottom:12px; }
+  .phone-input:focus { outline:none;border-color:var(--gold); }
+  .phone-input::placeholder { color:rgba(245,243,238,0.2);font-size:16px;letter-spacing:1px; }
+
+  .amount-row { display:flex;gap:10px;margin-bottom:14px;align-items:center; }
+  .amount-label { font-size:12px;color:rgba(245,243,238,0.6);white-space:nowrap; }
+  .amount-input { flex:1;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center; }
+  .amount-input:focus { outline:none;border-color:var(--gold); }
+  .points-preview { font-size:12px;color:#4ade80;white-space:nowrap;font-weight:600; }
+
+  .btn-checkin { width:100%;padding:15px;background:linear-gradient(135deg,var(--gold),#9a7520);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;color:var(--navy);cursor:pointer;transition:all 0.2s; }
+  .btn-checkin:hover { filter:brightness(1.1);transform:translateY(-1px); }
+  .btn-checkin:disabled { opacity:0.4;cursor:not-allowed;transform:none; }
+
+  .alert { padding:12px 16px;border-radius:10px;margin-bottom:16px;font-size:13px;width:100%;max-width:440px; }
+  .alert-error { background:rgba(192,57,43,0.2);border:1px solid rgba(192,57,43,0.5);color:#f87171; }
+
+  /* Success */
+  .success-wrap { width:100%;max-width:440px;display:none; }
+  .success-wrap.show { display:block; }
+
+  .success-hero { background:linear-gradient(135deg,rgba(26,107,74,0.2),rgba(26,107,74,0.08));border:2px solid rgba(74,222,128,0.4);border-radius:16px;padding:24px;text-align:center;margin-bottom:12px; }
+  .success-tick { font-size:42px;margin-bottom:10px; }
+  .success-name { font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;color:var(--cream); }
+  .success-id   { font-size:11px;color:rgba(245,243,238,0.4);margin-top:4px; }
+
+  .tier-pill { display:inline-block;padding:5px 16px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:10px 0; }
+  .tier-Iron   { background:rgba(156,163,175,0.2);border:1px solid #9ca3af;color:#d1d5db; }
+  .tier-Bronze { background:rgba(205,127,50,0.2); border:1px solid #cd7f32;color:#e0a060; }
+  .tier-Silver { background:rgba(156,163,175,0.2);border:1px solid #9ca3af;color:#d1d5db; }
+  .tier-Gold   { background:rgba(184,146,46,0.2); border:1px solid var(--gold);color:var(--gold-light); }
+
+  .points-earned-banner { background:linear-gradient(135deg,rgba(74,222,128,0.2),rgba(74,222,128,0.08));border:1px solid rgba(74,222,128,0.4);border-radius:12px;padding:18px;text-align:center;margin-bottom:12px; }
+  .pts-big { font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:700;color:#4ade80; }
+  .pts-sub { font-size:12px;color:rgba(245,243,238,0.5);margin-top:2px; }
+
+  .stats-row { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px; }
+  .stat-box { background:rgba(255,255,255,0.05);border-radius:10px;padding:14px;text-align:center; }
+  .stat-val { font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:var(--gold); }
+  .stat-lbl { font-size:10px;color:rgba(245,243,238,0.4);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px; }
+
+  .discount-box { background:linear-gradient(135deg,#1a6b4a,#147a50);border-radius:10px;padding:16px;text-align:center;margin-bottom:12px; }
+  .disc-lbl { font-size:11px;color:rgba(255,255,255,0.7);text-transform:uppercase;letter-spacing:1px; }
+  .disc-val { font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:700;color:#fff; }
+  .disc-sub { font-size:12px;color:rgba(255,255,255,0.6);margin-top:2px; }
+
+  /* Progress bar */
+  .progress-card { background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px;margin-bottom:12px; }
+  .progress-title { font-size:12px;color:rgba(245,243,238,0.5);margin-bottom:10px; }
+  .progress-track { background:rgba(255,255,255,0.08);border-radius:20px;height:10px;overflow:hidden;margin-bottom:8px; }
+  .progress-fill  { height:100%;border-radius:20px;background:linear-gradient(90deg,var(--gold),var(--gold-light));transition:width 1s ease; }
+  .progress-label { font-size:12px;color:rgba(245,243,238,0.5);text-align:center; }
+
+  /* Today's activities */
+  .today-card { background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:14px;margin-bottom:12px; }
+  .today-title { font-size:11px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px; }
+  .today-pills { display:flex;flex-wrap:wrap;gap:6px; }
+  .today-pill  { background:rgba(184,146,46,0.1);border:1px solid rgba(184,146,46,0.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--gold-light); }
+
+  /* Iron banner */
+  .iron-banner { background:linear-gradient(135deg,rgba(156,163,175,0.15),rgba(156,163,175,0.05));border:1px solid rgba(156,163,175,0.4);border-radius:10px;padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px; }
+  .iron-dot { width:10px;height:10px;border-radius:50%;background:#9ca3af;box-shadow:0 0 8px #9ca3af;flex-shrink:0; }
+  .iron-text { font-size:13px;color:#d1d5db; }
+
+  .btn-again { width:100%;background:transparent;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px;color:rgba(245,243,238,0.4);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:4px;transition:all 0.2s; }
+  .btn-again:hover { border-color:var(--gold);color:var(--gold); }
+
+  .loader { display:inline-block;width:16px;height:16px;border:2px solid rgba(26,39,68,0.3);border-top-color:var(--navy);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:middle;margin-right:6px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .footer { color:rgba(245,243,238,0.2);font-size:11px;text-align:center;margin-top:20px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">SAMSONS GROUP</div>
+  <div class="header-sub" id="resortSub">Loyalty Programme</div>
+  <div class="resort-badge" id="resortBadge">MJSR</div>
+</div>
+
+<div class="activity-badge">
+  <div class="activity-icon" id="activityIcon">⭐</div>
+  <div class="activity-label">Checking in to</div>
+  <div class="activity-name" id="activityName">Activity</div>
+</div>
+
+<div id="alertBox"></div>
+
+<div class="form-card" id="formCard">
+  <label class="form-label">Your Phone Number</label>
+  <input type="tel" id="phoneInput" class="phone-input" placeholder="03XX XXXXXXX"
+         inputmode="numeric" autocomplete="tel"
+         oninput="updatePointsPreview()"
+         onkeydown="if(event.key==='Enter') submitCheckin()">
+
+  <!-- Auto-detected price display (read only) -->
+  <div id="priceDisplay" style="background:rgba(184,146,46,0.08);border:1px solid rgba(184,146,46,0.25);border-radius:10px;padding:14px 16px;margin-bottom:14px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:11px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Ticket Price</div>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <span id="priceDisplay_amount" style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:var(--gold);">PKR —</span>
+          <span id="ptsPreview" style="font-size:13px;color:#4ade80;font-weight:600;"></span>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div id="priceSeasonLabel" style="font-size:11px;color:var(--gold-light);font-weight:600;"></div>
+        <div id="priceDayLabel"   style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;"></div>
+        <div style="font-size:10px;color:rgba(245,243,238,0.25);margin-top:4px;">Auto-detected</div>
+      </div>
+    </div>
+  </div>
+  <input type="hidden" id="amountInput" value="0">
+
+  <button class="btn-checkin" id="checkinBtn" onclick="submitCheckin()">Check In &amp; Earn Points</button>
+  <p style="font-size:11px;color:rgba(245,243,238,0.3);text-align:center;margin-top:10px;line-height:1.6;">Enter your membership phone number. Price is automatically applied based on today's date and season.</p>
+</div>
+
+<!-- Success -->
+<div class="success-wrap" id="successWrap">
+
+  <div class="success-hero">
+    <div class="success-tick">✅</div>
+    <div class="success-name" id="sName"></div>
+    <div class="success-id"   id="sID"></div>
+    <div class="tier-pill"    id="sTier"></div>
+  </div>
+
+  <div class="points-earned-banner">
+    <div style="font-size:12px;color:rgba(245,243,238,0.5);margin-bottom:4px;" id="ptsEarnedLabel">Points Earned This Visit</div>
+    <div class="pts-big" id="sPtsEarned">+0</div>
+    <div class="pts-sub" id="ptsEarnedSub">1 PKR = 1 Point</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-val" id="sTotalPts">0</div>
+      <div class="stat-lbl">Total Points</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" id="sActivity" style="font-size:16px;"></div>
+      <div class="stat-lbl">Activity</div>
+    </div>
+  </div>
+
+  <div class="discount-box">
+    <div class="disc-lbl">Your Loyalty Discount</div>
+    <div class="disc-val" id="sDiscount">5%</div>
+    <div class="disc-sub">Show this screen to the activity operator</div>
+  </div>
+
+  <!-- Iron banner -->
+  <div class="iron-banner" id="ironBanner" style="display:none;">
+    <div class="iron-dot"></div>
+    <div class="iron-text">You have an <strong>Iron Member discount (10%)</strong> available — valid once on any activity. Show this to staff at the counter.</div>
+  </div>
+
+  <!-- Progress to next tier -->
+  <div class="progress-card" id="progressCard">
+    <div class="progress-title" id="progressTitle">Progress to next tier</div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <!-- Today's activities -->
+  <div class="today-card" id="todayCard" style="display:none;">
+    <div class="today-title">Today's Check-Ins</div>
+    <div class="today-pills" id="todayPills"></div>
+  </div>
+
+  <button class="btn-again" onclick="resetForm()">Check In to Another Activity</button>
+</div>
+
+<div class="footer">MJSR & GV Loyalty Programme · Samsons Group of Companies</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrMvFCmcJXcqRqqzZq6rOUirhEYUYr4KGdqgltmH5brAf9BRIecTIoaodfNfw_Z3x_/exec';
+
+const ICONS = {
+  'Chairlift':          { emoji:'🚡', bg:'linear-gradient(135deg,#1a3a6b,#2d5aa0)' },
+  'Skiing':             { emoji:'⛷',  bg:'linear-gradient(135deg,#1a5c8a,#2980b9)' },
+  'Zipline':            { emoji:'🪂', bg:'linear-gradient(135deg,#1a6b2a,#27ae60)' },
+  'Giant Swing':        { emoji:'🎢', bg:'linear-gradient(135deg,#6b1a4a,#9b2d7a)' },
+  'Slingshot':          { emoji:'🎯', bg:'linear-gradient(135deg,#6b3a1a,#c0392b)' },
+  'Kids Climbing Wall': { emoji:'🧗', bg:'linear-gradient(135deg,#1a5c3a,#16a085)' },
+  'Leap of Faith':      { emoji:'🦅', bg:'linear-gradient(135deg,#4a1a6b,#8e44ad)' },
+  'Ferris Wheel':       { emoji:'🎡', bg:'linear-gradient(135deg,#1a4a6b,#1a7a9a)' },
+  'Kids Zipline':       { emoji:'🤸', bg:'linear-gradient(135deg,#2a6b1a,#3aaa20)' },
+};
+
+const params   = new URLSearchParams(window.location.search);
+const activity = params.get('activity') || 'Activity';
+const resort   = params.get('resort')   || 'MJSR';
+
+// Set up page
+document.getElementById('activityName').textContent = activity;
+document.title = activity + ' Check-In — Loyalty';
+
+const icon = ICONS[activity] || { emoji:'⭐', bg:'linear-gradient(135deg,#b8922e,#8a6b1e)' };
+const iconEl = document.getElementById('activityIcon');
+iconEl.textContent = icon.emoji;
+iconEl.style.background = icon.bg;
+
+const badge = document.getElementById('resortBadge');
+const sub   = document.getElementById('resortSub');
+if (resort === 'GV') {
+  badge.textContent = 'Green Valley Adventure Park';
+  badge.className   = 'resort-badge resort-gv';
+  sub.textContent   = 'Green Valley · Loyalty Programme';
+} else {
+  badge.textContent = 'Malam Jabba Ski Resort';
+  badge.className   = 'resort-badge resort-mjsr';
+  sub.textContent   = 'Malam Jabba · Loyalty Programme';
+}
+
+// Load current price from GAS on page load
+async function loadCurrentPrice() {
+  try {
+    const res = await fetch(GAS_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'GET_ACTIVITY_PRICE', activity })
+    });
+    const data = await res.json();
+    if (data.ok && data.price > 0) {
+      document.getElementById('amountInput').value = data.price;
+      document.getElementById('priceDisplay_amount').textContent = 'PKR ' + data.price.toLocaleString();
+      document.getElementById('priceSeasonLabel').textContent    = data.seasonType;
+      document.getElementById('priceDayLabel').textContent       = data.dayType;
+      updatePointsPreview();
+    } else {
+      document.getElementById('priceDisplay_amount').textContent = 'PKR —';
+      document.getElementById('priceSeasonLabel').textContent    = 'Price not set';
+      document.getElementById('priceDayLabel').textContent       = 'See staff';
+    }
+  } catch(e) {
+    document.getElementById('amountInput').placeholder = 'Enter amount';
+  }
+}
+
+function updatePointsPreview() {
+  const amt = parseFloat(document.getElementById('amountInput').value) || 0;
+  document.getElementById('ptsPreview').textContent = amt > 0 ? '= ' + Math.round(amt).toLocaleString() + ' pts' : '';
+}
+
+async function submitCheckin() {
+  const phone    = document.getElementById('phoneInput').value.trim();
+  const amountPKR= parseFloat(document.getElementById('amountInput').value) || 0;
+  if (!phone) { showAlert('Please enter your phone number.'); return; }
+
+  const btn = document.getElementById('checkinBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loader"></span>Checking in...';
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({ action:'ACTIVITY_CHECKIN', phone, activity, resort, amountPKR })
+    });
+    const data = await res.json();
+    btn.disabled = false; btn.textContent = 'Check In & Earn Points';
+
+    if (data.ok) showSuccess(data);
+    else showAlert(data.error);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Check In & Earn Points';
+    showAlert('Connection error. Please ask staff to log your visit manually.');
+  }
+}
+
+function showSuccess(d) {
+  document.getElementById('formCard').style.display = 'none';
+  document.getElementById('alertBox').innerHTML = '';
+
+  document.getElementById('sName').textContent      = d.name;
+  document.getElementById('sID').textContent        = d.memberID + (d.hometown ? ' · ' + d.hometown : '');
+  document.getElementById('sPtsEarned').textContent = '+' + (d.pointsEarned||0).toLocaleString();
+  if (d.bonusApplied) {
+    document.getElementById('ptsEarnedLabel').textContent = '🎉 First Visit — 2x Points Bonus!';
+    document.getElementById('ptsEarnedLabel').style.color = '#4ade80';
+    document.getElementById('ptsEarnedSub').textContent   = 'PKR ' + (d.amountPKR||0).toLocaleString() + ' × 2 = ' + (d.pointsEarned||0).toLocaleString() + ' pts (double points on your first visit)';
+  } else {
+    document.getElementById('ptsEarnedLabel').textContent = 'Points Earned This Visit';
+    document.getElementById('ptsEarnedLabel').style.color = 'rgba(245,243,238,0.5)';
+    document.getElementById('ptsEarnedSub').textContent   = '1 PKR = 1 Point';
+  }
+  document.getElementById('sTotalPts').textContent  = (d.totalPoints||0).toLocaleString();
+  document.getElementById('sActivity').textContent  = d.activity;
+  document.getElementById('sDiscount').textContent  = d.discount + '%';
+
+  const tierEl = document.getElementById('sTier');
+  tierEl.textContent = d.tier;
+  tierEl.className   = 'tier-pill tier-' + d.tier;
+
+  // Iron banner
+  document.getElementById('ironBanner').style.display = (!d.ironUsed && d.tier === 'Iron') ? 'flex' : 'none';
+
+  // Progress bar
+  if (d.nextTierMin && d.totalPoints < d.nextTierMin) {
+    const pct = Math.min(Math.round((d.totalPoints / d.nextTierMin) * 100), 99);
+    const needed = (d.nextTierMin - d.totalPoints).toLocaleString();
+    document.getElementById('progressFill').style.width  = pct + '%';
+    document.getElementById('progressLabel').textContent = needed + ' more points to reach ' + d.nextTier;
+    document.getElementById('progressTitle').textContent = 'Progress to ' + d.nextTier;
+    document.getElementById('progressCard').style.display = 'block';
+  } else {
+    document.getElementById('progressCard').style.display = 'none';
+  }
+
+  // Today's activities
+  if (d.todayActivities && d.todayActivities.length > 0) {
+    const pills = [...new Set(d.todayActivities.filter(Boolean))];
+    document.getElementById('todayPills').innerHTML = pills.map(a => `<div class="today-pill">${a}</div>`).join('');
+    document.getElementById('todayCard').style.display = 'block';
+  }
+
+  document.getElementById('successWrap').classList.add('show');
+}
+
+function resetForm() {
+  document.getElementById('successWrap').classList.remove('show');
+  document.getElementById('formCard').style.display = 'block';
+  document.getElementById('phoneInput').value  = '';
+  document.getElementById('amountInput').value = '';
+  document.getElementById('ptsPreview').textContent = '= 0 pts';
+  document.getElementById('todayCard').style.display = 'none';
+  document.getElementById('phoneInput').focus();
+}
+
+// Load price when page initialises
+loadCurrentPrice();
+
+function showAlert(msg) {
+  document.getElementById('alertBox').innerHTML = `<div class="alert alert-error">${msg}</div>`;
+}
+</script>
+</body>
+</html>

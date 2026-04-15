@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity QR Codes — MJSR & GV Print Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root { --gold:#b8922e; --navy:#1a2744; --cream:#f5f3ee; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'DM Sans',sans-serif; background:#eee; padding:20px; }
+
+  .controls { text-align:center; margin-bottom:20px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .btn { padding:10px 24px; border:none; border-radius:8px; cursor:pointer; font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600; }
+  .btn-print { background:var(--gold); color:var(--navy); }
+  .btn-mjsr  { background:var(--navy); color:var(--gold); border:2px solid var(--gold); }
+  .btn-gv    { background:#1a3a6b; color:#60a5fa; border:2px solid #60a5fa; }
+
+  .section-title { font-family:'Cormorant Garamond',serif; font-size:24px; color:var(--navy); text-align:center; margin:20px 0 12px; font-weight:700; }
+
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; max-width:860px; margin:0 auto 30px; }
+
+  .qr-card { background:white; border:2px solid var(--navy); border-radius:12px; padding:18px 14px; text-align:center; break-inside:avoid; }
+  .qr-header { background:var(--navy); margin:-18px -14px 14px; padding:12px 14px; border-radius:10px 10px 0 0; }
+  .qr-header.gv { background:#1a3a6b; }
+  .resort-label { font-size:9px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:4px; }
+  .resort-label.mjsr { color:var(--gold); }
+  .resort-label.gv   { color:#60a5fa; }
+  .act-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:700; color:white; }
+  .qr-img { width:150px; height:150px; margin:0 auto 10px; display:block; border-radius:6px; }
+  .scan-inst { font-size:11px; color:#555; line-height:1.5; margin-bottom:6px; }
+  .pts-note  { font-size:10px; color:#888; }
+  .loyalty-badge { display:inline-block; background:var(--navy); color:var(--gold); font-size:9px; font-weight:600; text-transform:uppercase; letter-spacing:1px; padding:3px 10px; border-radius:20px; margin-top:8px; }
+  .loyalty-badge.gv { background:#1a3a6b; color:#60a5fa; }
+
+  @media print {
+    body { background:white; padding:0; }
+    .controls { display:none; }
+    .qr-header { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .loyalty-badge { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="btn btn-print" onclick="window.print()">🖨 Print All QR Codes</button>
+</div>
+
+<!-- MJSR Activities -->
+<div class="section-title">🏔 Malam Jabba Ski Resort</div>
+<div class="grid" id="mjsrGrid"></div>
+
+<!-- GV Activities -->
+<div class="section-title">🌿 Green Valley Adventure Park</div>
+<div class="grid" id="gvGrid"></div>
+
+<script>
+const BASE = 'https://samsons-digital.github.io/mjsr-loyalty/checkin.html';
+
+const MJSR_ACTS = [
+  { name:'Chairlift',          emoji:'🚡' },
+  { name:'Skiing',             emoji:'⛷'  },
+  { name:'Zipline',            emoji:'🪂' },
+  { name:'Giant Swing',        emoji:'🎢' },
+  { name:'Slingshot',          emoji:'🎯' },
+  { name:'Kids Climbing Wall', emoji:'🧗' },
+  { name:'Leap of Faith',      emoji:'🦅' },
+];
+
+const GV_ACTS = [
+  { name:'Ferris Wheel',  emoji:'🎡' },
+  { name:'Kids Zipline',  emoji:'🤸' },
+  { name:'Chairlift',     emoji:'🚡' },
+];
+
+function buildGrid(acts, resort, gridId) {
+  const grid = document.getElementById(gridId);
+  const isGV = resort === 'GV';
+  acts.forEach(act => {
+    const url    = BASE + '?activity=' + encodeURIComponent(act.name) + '&resort=' + resort;
+    const qrUrl  = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
+                   encodeURIComponent(url) + '&bgcolor=ffffff&color=' + (isGV ? '1a3a6b' : '1a2744') + '&margin=8';
+    const card   = document.createElement('div');
+    card.className = 'qr-card';
+    card.innerHTML = `
+      <div class="qr-header ${isGV ? 'gv' : ''}">
+        <div class="resort-label ${isGV ? 'gv' : 'mjsr'}">${isGV ? 'Green Valley Adventure Park' : 'Malam Jabba Ski Resort'}</div>
+        <div class="act-title">${act.emoji} ${act.name}</div>
+      </div>
+      <img src="${qrUrl}" class="qr-img" alt="QR ${act.name}">
+      <p class="scan-inst"><strong>Loyalty Members:</strong> Scan, enter your phone number and ticket price to earn points and log your visit.</p>
+      <p class="pts-note">1 PKR = 1 Point · Points never expire</p>
+      <div class="loyalty-badge ${isGV ? 'gv' : ''}">Loyalty Programme</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+buildGrid(MJSR_ACTS, 'MJSR', 'mjsrGrid');
+buildGrid(GV_ACTS,   'GV',   'gvGrid');
+</script>
+</body>
+</html>
