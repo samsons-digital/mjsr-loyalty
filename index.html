@@ -414,16 +414,16 @@
 
       <div class="member-stats">
         <div class="stat-box">
-          <div class="stat-box-val" id="rVisitsResort">0</div>
-          <div class="stat-box-lbl">Visits This Resort</div>
+          <div class="stat-box-val" id="rTotalPoints" style="color:var(--gold);">0</div>
+          <div class="stat-box-lbl">Total Points</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-val" id="rVisitsMJSR">0</div>
-          <div class="stat-box-lbl">MJSR Visits</div>
+          <div class="stat-box-val" id="rNextTier" style="font-size:14px;">—</div>
+          <div class="stat-box-lbl">Next Tier</div>
         </div>
         <div class="stat-box">
-          <div class="stat-box-val" id="rVisitsGV">0</div>
-          <div class="stat-box-lbl">GV Visits</div>
+          <div class="stat-box-val" id="rPtsNeeded" style="font-size:16px;">—</div>
+          <div class="stat-box-lbl">Points Needed</div>
         </div>
         <div class="stat-box">
           <div class="stat-box-val" id="rDiscount">0%</div>
@@ -1109,10 +1109,23 @@ function showMemberResult(m) {
   document.getElementById('rTierBadge').className = 'tier-badge tier-' + tierKey;
   document.getElementById('rTierBadge').textContent = m.tier;
 
-  document.getElementById('rVisitsResort').textContent = m.resortVisits;
-  document.getElementById('rVisitsMJSR').textContent = m.visitsMJSR;
-  document.getElementById('rVisitsGV').textContent = m.visitsGV;
-  document.getElementById('rDiscount').textContent = m.discount + '%';
+  const pts = m.totalPoints || 0;
+  document.getElementById('rTotalPoints').textContent = pts.toLocaleString();
+  document.getElementById('rDiscount').textContent    = m.discount + '%';
+
+  // Next tier info
+  const tierOrder = ['Iron','Bronze','Silver','Gold'];
+  const tierMins  = { Iron:0, Bronze:5000, Silver:15000, Gold:35000 };
+  const tierIdx   = tierOrder.indexOf(m.tier);
+  if (tierIdx < tierOrder.length - 1) {
+    const nextTier = tierOrder[tierIdx + 1];
+    const needed   = (tierMins[nextTier] || 0) - pts;
+    document.getElementById('rNextTier').textContent   = nextTier;
+    document.getElementById('rPtsNeeded').textContent  = needed > 0 ? needed.toLocaleString() : '0';
+  } else {
+    document.getElementById('rNextTier').textContent  = 'Max Tier';
+    document.getElementById('rPtsNeeded').textContent = '—';
+  }
 
   const banner = document.getElementById('rDiscountBanner');
   if (m.discount > 0) {
@@ -1120,10 +1133,10 @@ function showMemberResult(m) {
     document.getElementById('rDiscountText').textContent = 'Apply Loyalty Discount';
   } else {
     banner.classList.add('no-discount');
-    document.getElementById('rDiscountText').textContent = 'No discount at Explorer tier';
+    document.getElementById('rDiscountText').textContent = 'Iron tier — use Iron one-time discount if available';
   }
   document.getElementById('rDiscountPct').textContent = m.discount + '%';
-  document.getElementById('rTierLabel').textContent = m.tier + ' member — visit #' + (m.resortVisits + 1) + ' at ' + activeResort;
+  document.getElementById('rTierLabel').textContent = m.tier + ' member · ' + pts.toLocaleString() + ' points · ' + activeResort;
 
   // Welcome code panel
   const wPanel = document.getElementById('welcomeCodePanel');
