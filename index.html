@@ -843,10 +843,29 @@
     <div class="tab-panel" id="tab-settings">
       <div id="settingsAlert"></div>
 
-      <!-- Tier Thresholds -->
+      <!-- Iron Tier -->
+      <div style="background:rgba(156,163,175,0.06);border:1px solid rgba(156,163,175,0.3);border-radius:10px;padding:22px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:500;color:#d1d5db;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">&#9878; Iron Tier</div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">All new members start at Iron. They receive a one-time Iron discount on signup, usable anywhere on the resort.</div>
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:center;">
+          <div style="background:rgba(156,163,175,0.08);border:1px solid rgba(156,163,175,0.3);border-radius:10px;padding:18px;text-align:center;">
+            <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:8px;">Iron One-Time Discount %</label>
+            <input type="number" id="cfg_ironDiscount" min="0" max="100" step="0.5" value="10"
+              style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(156,163,175,0.4);border-radius:6px;color:#d1d5db;font-family:'DM Sans',sans-serif;font-size:22px;text-align:center;font-weight:700;">
+          </div>
+          <div style="font-size:12px;color:rgba(245,243,238,0.5);line-height:1.7;">
+            <div style="margin-bottom:6px;">&#9679; Given to every new member on signup</div>
+            <div style="margin-bottom:6px;">&#9679; 10% off anywhere on the resort — all activities</div>
+            <div style="margin-bottom:6px;">&#9679; Redeemable via QR scan or staff lookup</div>
+            <div>&#9679; One-time use only — cannot be redeemed twice</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Points Tier Thresholds -->
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Tier Visit Thresholds</div>
-        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">Set the minimum number of visits required to reach each tier. These apply per resort, per calendar year.</div>
+        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Points Tier Thresholds</div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">Set how many lifetime points are required to reach each tier. 1 PKR spent = 1 point. Points never expire.</div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
           <!-- Bronze -->
@@ -856,8 +875,8 @@
               <span style="font-size:12px;font-weight:600;color:#e0a060;text-transform:uppercase;letter-spacing:1px;">Bronze</span>
             </div>
             <div style="margin-bottom:12px;">
-              <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Starts at visit</label>
-              <input type="number" id="cfg_bronzeMin" min="1" max="50" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(205,127,50,0.4);border-radius:6px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center;">
+              <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Starts at points</label>
+              <input type="number" id="cfg_bronzeMin" min="1" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(205,127,50,0.4);border-radius:6px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center;">
             </div>
             <div>
               <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Discount %</label>
@@ -872,8 +891,8 @@
               <span style="font-size:12px;font-weight:600;color:#d1d5db;text-transform:uppercase;letter-spacing:1px;">Silver</span>
             </div>
             <div style="margin-bottom:12px;">
-              <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Starts at visit</label>
-              <input type="number" id="cfg_silverMin" min="2" max="50" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(156,163,175,0.4);border-radius:6px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center;">
+              <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Starts at points</label>
+              <input type="number" id="cfg_silverMin" min="1" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(156,163,175,0.4);border-radius:6px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center;">
             </div>
             <div>
               <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Discount %</label>
@@ -888,8 +907,8 @@
               <span style="font-size:12px;font-weight:600;color:var(--gold-light);text-transform:uppercase;letter-spacing:1px;">Gold</span>
             </div>
             <div style="margin-bottom:12px;">
-              <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Starts at visit</label>
-              <input type="number" id="cfg_goldMin" min="3" max="50" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(184,146,46,0.4);border-radius:6px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center;">
+              <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Starts at points</label>
+              <input type="number" id="cfg_goldMin" min="1" style="width:100%;padding:8px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(184,146,46,0.4);border-radius:6px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:16px;text-align:center;">
             </div>
             <div>
               <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:5px;">Discount %</label>
@@ -899,88 +918,64 @@
         </div>
 
         <div style="margin-top:16px;padding:12px 16px;background:rgba(255,255,255,0.03);border-radius:8px;font-size:12px;color:rgba(245,243,238,0.45);">
-          <strong style="color:rgba(245,243,238,0.7);">Validation rules:</strong>
-          Silver must start after Bronze ends. Gold must start after Silver ends. Discounts must increase Bronze &lt; Silver &lt; Gold. Changes take effect immediately for all future visit logs.
+          <strong style="color:rgba(245,243,238,0.7);">Note:</strong>
+          Points are lifetime — they never reset or expire. Tier thresholds can be adjusted at any time. Changes take effect immediately.
         </div>
       </div>
 
-
-      <!-- Welcome Discount Setting -->
-      <div style="background:rgba(74,222,128,0.05);border:1px solid rgba(74,222,128,0.25);border-radius:10px;padding:22px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:500;color:#4ade80;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Welcome Discount</div>
-        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">The one-time discount applied when a new member redeems their welcome code at the gate. Applies to all activities.</div>
+      <!-- Points Redemption Rate -->
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Points Redemption Rate</div>
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">How many points equal PKR 1 of value when a member redeems points for a free activity.</div>
         <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:center;">
-          <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:18px;text-align:center;">
-            <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:8px;">Welcome Discount %</label>
-            <input type="number" id="cfg_welcomeDiscount" min="0" max="100" step="0.5" value="10"
-              style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(74,222,128,0.4);border-radius:6px;color:#4ade80;font-family:'DM Sans',sans-serif;font-size:22px;text-align:center;font-weight:700;">
+          <div style="background:rgba(184,146,46,0.08);border:1px solid rgba(184,146,46,0.3);border-radius:10px;padding:18px;text-align:center;">
+            <label style="font-size:10px;color:rgba(245,243,238,0.5);text-transform:uppercase;letter-spacing:0.7px;display:block;margin-bottom:8px;">Points per PKR 1</label>
+            <input type="number" id="cfg_redeemRate" min="1" value="500"
+              style="width:100%;padding:10px 12px;background:rgba(255,255,255,0.07);border:1px solid rgba(184,146,46,0.4);border-radius:6px;color:var(--gold-light);font-family:'DM Sans',sans-serif;font-size:22px;text-align:center;font-weight:700;">
           </div>
           <div style="font-size:12px;color:rgba(245,243,238,0.5);line-height:1.7;">
-            <div style="margin-bottom:6px;">&#9679; Applied on the member's <strong style="color:var(--cream);">first visit only</strong></div>
-            <div style="margin-bottom:6px;">&#9679; Shown automatically at gate when staff looks up phone</div>
-            <div style="margin-bottom:6px;">&#9679; Staff can verify with code or redeem by phone lookup</div>
-            <div>&#9679; Marked as used in sheet after redemption — cannot be redeemed twice</div>
+            <div style="margin-bottom:6px;">&#9679; Default: 500 points = PKR 1 value</div>
+            <div style="margin-bottom:6px;">&#9679; e.g. at 500 rate: 950,000 pts = free chairlift (PKR 1,900)</div>
+            <div style="margin-bottom:6px;">&#9679; Staff redeems points manually via the Admin Members panel</div>
+            <div>&#9679; Redemption is logged in the Points_Log sheet</div>
           </div>
         </div>
       </div>
-
 
       <!-- Email Notifications -->
       <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;">
         <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">Email Notifications</div>
-        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">Control which automated emails are sent to customers. Changes take effect immediately.</div>
-
+        <div style="font-size:12px;color:rgba(245,243,238,0.45);margin-bottom:18px;">Control which automated emails are sent to customers.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div>
-              <div style="font-size:13px;font-weight:500;">Welcome Email</div>
-              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Sent on new member signup</div>
-            </div>
+            <div><div style="font-size:13px;font-weight:500;">Welcome Email</div><div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Sent on signup with Iron code</div></div>
             <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
               <input type="checkbox" id="cfg_emailWelcome" style="opacity:0;width:0;height:0;">
               <span onclick="toggleSwitch('cfg_emailWelcome')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailWelcome"></span>
             </label>
           </div>
-
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div>
-              <div style="font-size:13px;font-weight:500;">Post-Visit Email</div>
-              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Progress update after each visit</div>
-            </div>
+            <div><div style="font-size:13px;font-weight:500;">Points Earned Email</div><div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">After each activity check-in</div></div>
             <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
               <input type="checkbox" id="cfg_emailPostVisit" style="opacity:0;width:0;height:0;">
               <span onclick="toggleSwitch('cfg_emailPostVisit')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailPostVisit"></span>
             </label>
           </div>
-
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div>
-              <div style="font-size:13px;font-weight:500;">Tier Upgrade Email</div>
-              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Sent when member reaches new tier</div>
-            </div>
+            <div><div style="font-size:13px;font-weight:500;">Tier Upgrade Email</div><div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">When member reaches new tier</div></div>
             <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
               <input type="checkbox" id="cfg_emailTierUpgrade" style="opacity:0;width:0;height:0;">
               <span onclick="toggleSwitch('cfg_emailTierUpgrade')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailTierUpgrade"></span>
             </label>
           </div>
-
           <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:9px;padding:14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-            <div>
-              <div style="font-size:13px;font-weight:500;">Welcome Discount</div>
-              <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Enable one-time welcome code at gate</div>
-            </div>
+            <div><div style="font-size:13px;font-weight:500;">Iron Discount Emails</div><div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:2px;">Enable Iron member email features</div></div>
             <label style="position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0;">
               <input type="checkbox" id="cfg_emailWelcomeDiscount" style="opacity:0;width:0;height:0;">
               <span onclick="toggleSwitch('cfg_emailWelcomeDiscount')" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.15);border-radius:24px;transition:0.3s;" id="sw_emailWelcomeDiscount"></span>
             </label>
           </div>
         </div>
-      </div>
-
-      <!-- Preview -->
-      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:22px;margin-bottom:16px;" id="tierPreviewCard">
-        <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">Live Preview</div>
-        <div id="tierPreview" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;"></div>
       </div>
 
       <!-- Save Button -->
@@ -1638,20 +1633,31 @@ async function loadSettings() {
   try {
     const res = await api({ action: 'GET_CONFIG', pin: adminPIN });
     if (!res.ok) { showAlert('settingsAlert', 'error', res.error); return; }
-    document.getElementById('cfg_bronzeMin').value      = res.bronze.min;
-    document.getElementById('cfg_bronzeDiscount').value = res.bronze.discount;
-    document.getElementById('cfg_silverMin').value      = res.silver.min;
-    document.getElementById('cfg_silverDiscount').value = res.silver.discount;
-    document.getElementById('cfg_goldMin').value        = res.gold.min;
-    document.getElementById('cfg_goldDiscount').value   = res.gold.discount;
-    if (res.welcomeDiscount !== undefined) document.getElementById('cfg_welcomeDiscount').value = res.welcomeDiscount;
+
+    // Iron
+    if (res.tiers && res.tiers.iron !== undefined) document.getElementById('cfg_ironDiscount').value = res.tiers.iron.discount;
+
+    // Points tiers
+    if (res.tiers) {
+      document.getElementById('cfg_bronzeMin').value      = res.tiers.bronze ? res.tiers.bronze.min      : 5000;
+      document.getElementById('cfg_bronzeDiscount').value = res.tiers.bronze ? res.tiers.bronze.discount : 5;
+      document.getElementById('cfg_silverMin').value      = res.tiers.silver ? res.tiers.silver.min      : 15000;
+      document.getElementById('cfg_silverDiscount').value = res.tiers.silver ? res.tiers.silver.discount : 15;
+      document.getElementById('cfg_goldMin').value        = res.tiers.gold   ? res.tiers.gold.min        : 35000;
+      document.getElementById('cfg_goldDiscount').value   = res.tiers.gold   ? res.tiers.gold.discount   : 25;
+    }
+
+    // Redemption rate
+    if (res.redemptionRate !== undefined) document.getElementById('cfg_redeemRate').value = res.redemptionRate;
+
+    // Email toggles
     if (res.emailConfig) {
       setSwitch('cfg_emailWelcome',         res.emailConfig.welcome);
       setSwitch('cfg_emailPostVisit',       res.emailConfig.postVisit);
       setSwitch('cfg_emailTierUpgrade',     res.emailConfig.tierUpgrade);
-      setSwitch('cfg_emailWelcomeDiscount', res.emailConfig.welcomeDiscount);
+      setSwitch('cfg_emailWelcomeDiscount', res.emailConfig.ironDiscount !== undefined ? res.emailConfig.ironDiscount : res.emailConfig.welcomeDiscount);
     }
-    updateTierPreview(res);
+
   } catch(e) { showAlert('settingsAlert', 'error', 'Could not load settings.'); }
 }
 
@@ -1684,22 +1690,23 @@ async function saveSettings() {
   try {
     const res = await api({
       action: 'SAVE_CONFIG', pin: adminPIN,
-      bronzeMin:      document.getElementById('cfg_bronzeMin').value,
-      silverMin:      document.getElementById('cfg_silverMin').value,
-      goldMin:        document.getElementById('cfg_goldMin').value,
+      ironDiscount:    document.getElementById('cfg_ironDiscount').value,
+      bronzeMin:       document.getElementById('cfg_bronzeMin').value,
       bronzeDiscount:  document.getElementById('cfg_bronzeDiscount').value,
-      welcomeDiscount:        document.getElementById('cfg_welcomeDiscount') ? document.getElementById('cfg_welcomeDiscount').value : 10,
-      emailWelcome:           document.getElementById('cfg_emailWelcome') ? document.getElementById('cfg_emailWelcome').checked : true,
-      emailPostVisit:         document.getElementById('cfg_emailPostVisit') ? document.getElementById('cfg_emailPostVisit').checked : true,
-      emailTierUpgrade:       document.getElementById('cfg_emailTierUpgrade') ? document.getElementById('cfg_emailTierUpgrade').checked : true,
-      emailWelcomeDiscount:   document.getElementById('cfg_emailWelcomeDiscount') ? document.getElementById('cfg_emailWelcomeDiscount').checked : true,
-      silverDiscount: document.getElementById('cfg_silverDiscount').value,
-      goldDiscount:   document.getElementById('cfg_goldDiscount').value,
+      silverMin:       document.getElementById('cfg_silverMin').value,
+      silverDiscount:  document.getElementById('cfg_silverDiscount').value,
+      goldMin:         document.getElementById('cfg_goldMin').value,
+      goldDiscount:    document.getElementById('cfg_goldDiscount').value,
+      redemptionRate:  document.getElementById('cfg_redeemRate').value,
+      emailWelcome:         document.getElementById('cfg_emailWelcome')         ? document.getElementById('cfg_emailWelcome').checked         : true,
+      emailPostVisit:       document.getElementById('cfg_emailPostVisit')       ? document.getElementById('cfg_emailPostVisit').checked       : true,
+      emailTierUpgrade:     document.getElementById('cfg_emailTierUpgrade')     ? document.getElementById('cfg_emailTierUpgrade').checked     : true,
+      emailWelcomeDiscount: document.getElementById('cfg_emailWelcomeDiscount') ? document.getElementById('cfg_emailWelcomeDiscount').checked : true,
     });
     btn.disabled = false;
     btn.textContent = 'Save Configuration';
     if (res.ok) {
-      showAlert('settingsAlert', 'success', 'Configuration saved. New tier thresholds and discounts are live immediately.');
+      showAlert('settingsAlert', 'success', 'Configuration saved successfully. All changes are live immediately.');
       loadSettings();
     } else {
       showAlert('settingsAlert', 'error', res.error);
