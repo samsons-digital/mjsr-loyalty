@@ -12,9 +12,9 @@
     --gold: #b8922e;
     --gold-light: #d4aa50;
     --gold-dark: #8a6b1e;
-    --navy: #1a2744;
-    --navy-light: #243358;
-    --navy-mid: #1e2f52;
+    --navy: #1e3a5f;
+    --navy-light: #2a4875;
+    --navy-mid: #243f6a;
     --white: #ffffff;
     --gray: #6b7280;
     --gray-light: #e5e0d5;
@@ -720,7 +720,7 @@
 
     <!-- Edit Visit Modal -->
     <div id="editVisitModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;">
-      <div style="background:#1e2f52;border:1px solid var(--gold);border-radius:14px;padding:28px;width:90%;max-width:480px;">
+      <div style="background:#243f6a;border:1px solid var(--gold);border-radius:14px;padding:28px;width:90%;max-width:480px;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:20px;">Edit Visit Record</div>
         <div id="editVisitAlert"></div>
         <input type="hidden" id="editVisitID">
@@ -745,7 +745,7 @@
 
     <!-- Edit Member Modal -->
     <div id="editMemberModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;">
-      <div style="background:#1e2f52;border:1px solid var(--gold);border-radius:14px;padding:28px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;">
+      <div style="background:#243f6a;border:1px solid var(--gold);border-radius:14px;padding:28px;width:90%;max-width:520px;max-height:90vh;overflow-y:auto;">
         <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);margin-bottom:20px;">Edit Member Profile</div>
         <div id="editMemberAlert"></div>
         <input type="hidden" id="editMemberID">
@@ -1245,7 +1245,9 @@ function renderDashboard(d) {
   const sg = document.getElementById('statGrid');
   sg.innerHTML = `
     ${statCard(d.totalMembers, 'Total Members')}
-    ${statCard(d.totalVisitsYear, 'Visits This Year')}
+    ${statCard((d.totalVisitsYear||0), 'Visits This Year')}
+    ${statCard((d.totalPoints||0).toLocaleString(), 'Total Points Issued')}
+    ${statCard((d.yearPoints||0).toLocaleString(), 'Points This Year')}
     ${statCard(d.visitsMJSR, 'MJSR Visits')}
     ${statCard(d.visitsGV, 'GV Visits')}
   `;
@@ -1289,13 +1291,13 @@ function renderDashboard(d) {
   if ((d.topMembers||[]).length === 0) {
     tm.innerHTML = '<tr><td colspan="5" style="text-align:center;color:rgba(245,243,238,0.4);padding:20px;">No visit data yet</td></tr>';
   } else {
-    tm.innerHTML = `<thead><tr><th>#</th><th>Member</th><th>MJSR</th><th>GV</th><th>Total</th></tr></thead><tbody>` +
+    tm.innerHTML = `<thead><tr><th>#</th><th>Member</th><th>Tier</th><th>Total Points</th></tr></thead><tbody>` +
       d.topMembers.map((m, i) => `
         <tr>
           <td style="color:rgba(245,243,238,0.4);">${i+1}</td>
           <td><div style="font-weight:500;">${m.name}</div><div style="font-size:11px;color:rgba(245,243,238,0.4);">${m.id}</div></td>
-          <td>${m.MJSR}</td><td>${m.GV}</td>
-          <td><strong style="color:var(--gold);">${m.total}</strong></td>
+          <td><span class="tier-badge tier-${(m.tier||'Iron').replace(' ','')}" style="font-size:10px;padding:3px 10px;">${m.tier||'Iron'}</span></td>
+          <td><strong style="color:var(--gold);">${(m.points||0).toLocaleString()}</strong></td>
         </tr>`
       ).join('') + '</tbody>';
   }
