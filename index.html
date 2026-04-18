@@ -461,12 +461,18 @@
 
       <div class="form-row" style="margin-bottom:14px">
         <div class="form-group">
+          <label>Invoice Number <span style="color:#f87171;font-size:10px;">Required</span></label>
+          <input type="text" id="visitInvoice" placeholder="e.g. INV-2026-00142" style="border-color:rgba(184,146,46,0.4);">
+        </div>
+        <div class="form-group">
           <label>Staff Name</label>
           <input type="text" id="visitStaff" placeholder="Your name">
         </div>
+      </div>
+      <div class="form-row" style="margin-bottom:14px">
         <div class="form-group">
           <label>Notes (optional)</label>
-          <input type="text" id="visitNotes" placeholder="Any remarks">
+          <input type="text" id="visitNotes" placeholder="Any additional remarks">
         </div>
       </div>
 
@@ -1295,6 +1301,9 @@ function updateInvoiceTotal() {
 async function submitVisit() {
   if (!foundMember) return;
 
+  const invoiceNum = document.getElementById('visitInvoice').value.trim();
+  if (!invoiceNum) { showAlert('visitAlert', 'error', 'Please enter the invoice number before submitting.'); return; }
+
   const checkedActs = [...document.querySelectorAll('#activitiesGrid input[type=checkbox]:checked')];
   const activities  = checkedActs.map(i => i.value);
   let totalAmount   = 0;
@@ -1312,11 +1321,12 @@ async function submitVisit() {
   try {
     const res = await api({
       action: 'LOG_VISIT',
-      memberID: foundMember.memberID,
-      phone: foundMember.phone,
-      resort: activeResort,
+      memberID:   foundMember.memberID,
+      phone:      foundMember.phone,
+      resort:     activeResort,
       activities,
-      amountPKR: totalAmount,
+      amountPKR:  totalAmount,
+      invoiceNum: document.getElementById('visitInvoice').value.trim(),
       notes,
       staff
     });
@@ -1331,6 +1341,7 @@ async function submitVisit() {
         `Visit logged! ${res.name} — ${res.tier} tier — ${res.discount}% discount.${ptsTxt}${upgTxt} Total: ${(res.totalPoints||0).toLocaleString()} pts. (${res.visitID})`);
       clearVisitResult();
       document.getElementById('visitPhone').value = '';
+      document.getElementById('visitInvoice').value = '';
     } else {
       showAlert('visitAlert', 'error', res.error);
     }
