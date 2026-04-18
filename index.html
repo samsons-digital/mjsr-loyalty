@@ -1524,7 +1524,10 @@ async function loadAdminMembers(page = 1) {
           </div>
           <span style="font-size:10px;color:${m.active==='Active'?'#4ade80':'#f87171'};margin-top:2px;">${m.active}</span>
         </div>
-        <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick='openEditMember(${JSON.stringify({memberID:m.memberID,name:m.name,phone:m.phone,email:m.email,cnic:m.cnic,hometown:m.hometown,district:m.district,province:m.province,notes:m.notes})})'>Edit Profile</button>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <button class="btn btn-outline btn-sm" onclick='openEditMember(${JSON.stringify({memberID:m.memberID,name:m.name,phone:m.phone,email:m.email,cnic:m.cnic,hometown:m.hometown,district:m.district,province:m.province,notes:m.notes})})'>Edit Profile</button>
+          <button class="btn btn-sm" style="${m.active==='Active' ? 'background:rgba(192,57,43,0.15);color:#f87171;border:1px solid rgba(192,57,43,0.4);' : 'background:rgba(26,107,74,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.4);'}" onclick="toggleMemberStatus('${m.memberID}','${m.name}','${m.active}')">${m.active==='Active' ? 'Block' : 'Unblock'}</button>
+        </div>
       </div>
     `).join('');
 
@@ -1568,6 +1571,7 @@ async function searchMembers() {
             ${m.visitsGV > 0   ? `<span class="tier-badge tier-${m.tierGV.replace(' ','')}  " style="font-size:10px;padding:3px 10px;">GV ${m.tierGV}</span>` : ''}
           </div>
           <span style="font-size:10px;color:${m.active==='Active'?'#4ade80':'#f87171'};margin-top:2px;">${m.active}</span>
+          <button class="btn btn-sm" style="margin-top:4px;${m.active==='Active' ? 'background:rgba(192,57,43,0.15);color:#f87171;border:1px solid rgba(192,57,43,0.4);' : 'background:rgba(26,107,74,0.15);color:#4ade80;border:1px solid rgba(74,222,128,0.4);'}" onclick="toggleMemberStatus('${m.memberID}','${m.name}','${m.active}')">${m.active==='Active' ? 'Block' : 'Unblock'}</button>
         </div>
       </div>
     `).join('');
@@ -1930,6 +1934,31 @@ async function sendTestEmail() {
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Send Test to Me';
     showAlert('emailsAlert','error','Connection error.');
+  }
+}
+
+
+async function toggleMemberStatus(memberID, memberName, currentStatus) {
+  const isBlocking = currentStatus === 'Active';
+  const action = isBlocking ? 'block' : 'unblock';
+  const msg = isBlocking
+    ? `Block ${memberName}?\n\nThis will prevent them from logging visits or using their membership. You can unblock them at any time.`
+    : `Unblock ${memberName}?\n\nThis will restore their membership and allow them to use the loyalty system again.`;
+
+  if (!confirm(msg)) return;
+
+  try {
+    const res = await api({ action: 'ADMIN_TOGGLE', pin: adminPIN, memberID });
+    if (res.ok) {
+      const statusText = res.newStatus === 'Active' ? 'unblocked' : 'blocked';
+      showAlert('subAlert', res.newStatus === 'Active' ? 'success' : 'error',
+        `${memberName} has been ${statusText} successfully.`);
+      loadAdminMembers(adminPage);
+    } else {
+      alert('Error: ' + res.error);
+    }
+  } catch(e) {
+    alert('Connection error. Please try again.');
   }
 }
 
