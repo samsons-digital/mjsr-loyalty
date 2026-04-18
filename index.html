@@ -688,6 +688,7 @@
       <button class="tab-btn" onclick="switchTab('submissions')">Submissions Log</button>
       <button class="tab-btn" onclick="switchTab('visitlog')">Visit Log</button>
       <button class="tab-btn" onclick="switchTab('prices')">&#128179; Prices</button>
+      <button class="tab-btn" onclick="switchTab('emails')">&#9993; Emails</button>
       <button class="tab-btn" onclick="switchTab('settings')">&#9881; Settings</button>
     </div>
 
@@ -853,6 +854,72 @@
       </div>
 
       <button class="btn btn-primary" onclick="savePrices()" id="savePricesBtn" style="width:100%;padding:14px;">Save Prices</button>
+    </div>
+
+
+    <!-- Emails Tab -->
+    <div class="tab-panel" id="tab-emails">
+      <div id="emailsAlert"></div>
+
+      <!-- Email selector -->
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;" id="emailTypeBar">
+        <button class="btn btn-outline btn-sm" id="etBtn_welcome" onclick="selectEmailType('welcome')" style="border-color:var(--gold);color:var(--gold);">Welcome Email</button>
+        <button class="btn btn-outline btn-sm" id="etBtn_points" onclick="selectEmailType('points')">Points Earned</button>
+        <button class="btn btn-outline btn-sm" id="etBtn_upgrade" onclick="selectEmailType('upgrade')">Tier Upgrade</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+
+        <!-- Left: Editor -->
+        <div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:10px;padding:20px;margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;">Email Editor</div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Subject Line</label>
+              <input type="text" id="emailSubject" class="staff-input" style="margin-bottom:0;" oninput="updateEmailPreview()" placeholder="e.g. Welcome to MJSR Loyalty — Your Iron Benefits">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Greeting / Opening Line</label>
+              <input type="text" id="emailGreeting" class="staff-input" style="margin-bottom:0;" oninput="updateEmailPreview()" placeholder="e.g. We are delighted to welcome you">
+            </div>
+
+            <div class="form-group" style="margin-bottom:12px;">
+              <label>Main Body Message</label>
+              <textarea id="emailBody" style="width:100%;padding:10px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100px;resize:vertical;" oninput="updateEmailPreview()" placeholder="Main message text..."></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Closing Line</label>
+              <input type="text" id="emailClosing" class="staff-input" style="margin-bottom:0;" oninput="updateEmailPreview()" placeholder="e.g. We look forward to seeing you at MJSR soon.">
+            </div>
+          </div>
+
+          <!-- Dynamic tags reference -->
+          <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:16px;margin-bottom:14px;">
+            <div style="font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Available Tags</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;" id="tagRef"></div>
+            <div style="font-size:11px;color:rgba(245,243,238,0.35);margin-top:10px;">Click a tag to insert it at the cursor position in the body field.</div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-outline" onclick="sendTestEmail()" id="testEmailBtn" style="flex:1;">Send Test to Me</button>
+            <button class="btn btn-primary" onclick="saveEmailTemplate()" id="saveEmailBtn" style="flex:1;">Save Template</button>
+          </div>
+        </div>
+
+        <!-- Right: Live Preview -->
+        <div>
+          <div style="font-size:13px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Live Preview</div>
+          <div style="background:#f5f3ee;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.1);">
+            <div id="emailPreviewPane" style="min-height:300px;"></div>
+          </div>
+          <div style="font-size:11px;color:rgba(245,243,238,0.35);margin-top:8px;text-align:center;">Preview uses sample data. Dynamic tags will be replaced with real member data when sent.</div>
+        </div>
+
+      </div>
     </div>
 
     <!-- Settings Tab -->
@@ -1043,6 +1110,7 @@ function switchTab(name) {
   event.target.classList.add('active');
   if (name === 'visitlog') loadVisitLog();
   if (name === 'settings') loadSettings();
+  if (name === 'emails') loadEmailTemplates();
   if (name === 'prices') loadPrices();
   if (name === 'submissions') loadSubmissions();
 }
@@ -1704,6 +1772,153 @@ async function savePrices() {
   } catch(e) {
     btn.disabled = false; btn.textContent = 'Save Prices';
     showAlert('pricesAlert','error','Connection error.');
+  }
+}
+
+
+// ===== EMAIL TEMPLATES =====
+let emailTemplates = {};
+let currentEmailType = 'welcome';
+
+const EMAIL_TAGS = {
+  welcome: ['{{name}}','{{memberID}}','{{tier}}','{{resort}}','{{ironCode}}','{{discount}}'],
+  points:  ['{{name}}','{{memberID}}','{{tier}}','{{resort}}','{{points}}','{{totalPoints}}','{{nextTier}}','{{nextTierPoints}}','{{nextDiscount}}','{{activity}}'],
+  upgrade: ['{{name}}','{{memberID}}','{{tier}}','{{resort}}','{{discount}}'],
+};
+
+const EMAIL_TYPE_LABELS = { welcome:'Welcome Email', points:'Points Earned', upgrade:'Tier Upgrade' };
+
+const SAMPLE_DATA = {
+  '{{name}}':'Ahmed Khan', '{{memberID}}':'LM-00042', '{{tier}}':'Silver',
+  '{{discount}}':'15', '{{points}}':'1,900', '{{totalPoints}}':'18,500',
+  '{{nextTier}}':'Gold', '{{nextTierPoints}}':'16,500', '{{nextDiscount}}':'25',
+  '{{activity}}':'Chairlift', '{{resort}}':'Malam Jabba Ski Resort',
+  '{{ironCode}}':'IRON-00042-XKPQ',
+};
+
+function fillTags(str) {
+  let s = str;
+  for (const [tag, val] of Object.entries(SAMPLE_DATA)) s = s.split(tag).join('<strong style="color:#b8922e;">' + val + '</strong>');
+  return s;
+}
+
+async function loadEmailTemplates() {
+  try {
+    const res = await api({ action:'GET_EMAIL_TEMPLATES', pin:adminPIN });
+    if (!res.ok) { showAlert('emailsAlert','error',res.error); return; }
+    emailTemplates = res.templates;
+    selectEmailType('welcome');
+  } catch(e) { showAlert('emailsAlert','error','Could not load email templates.'); }
+}
+
+function selectEmailType(type) {
+  currentEmailType = type;
+  ['welcome','points','upgrade'].forEach(t => {
+    const btn = document.getElementById('etBtn_' + t);
+    if (btn) {
+      btn.style.borderColor = t === type ? 'var(--gold)' : '';
+      btn.style.color = t === type ? 'var(--gold)' : '';
+      btn.style.background = t === type ? 'rgba(184,146,46,0.1)' : '';
+    }
+  });
+
+  const tpl = emailTemplates[type] || { subject:'', greeting:'', body:'', closing:'' };
+  document.getElementById('emailSubject').value  = tpl.subject  || '';
+  document.getElementById('emailGreeting').value = tpl.greeting || '';
+  document.getElementById('emailBody').value     = tpl.body     || '';
+  document.getElementById('emailClosing').value  = tpl.closing  || '';
+
+  // Render tag buttons
+  const tagRef = document.getElementById('tagRef');
+  tagRef.innerHTML = (EMAIL_TAGS[type] || []).map(tag =>
+    `<button onclick="insertTag('${tag}')" style="padding:4px 10px;background:rgba(184,146,46,0.1);border:1px solid rgba(184,146,46,0.3);border-radius:20px;color:var(--gold);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;">${tag}</button>`
+  ).join('');
+
+  updateEmailPreview();
+}
+
+function insertTag(tag) {
+  const ta = document.getElementById('emailBody');
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  const val   = ta.value;
+  ta.value = val.substring(0, start) + tag + val.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + tag.length;
+  ta.focus();
+  updateEmailPreview();
+}
+
+function updateEmailPreview() {
+  const greeting = document.getElementById('emailGreeting').value || '';
+  const body     = document.getElementById('emailBody').value     || '';
+  const closing  = document.getElementById('emailClosing').value  || '';
+  const subject  = document.getElementById('emailSubject').value  || '';
+
+  const accent = currentEmailType === 'upgrade' ? '#b8922e' : currentEmailType === 'points' ? '#4ade80' : '#9ca3af';
+
+  const preview = `
+    <div style="background:#1a2744;border-radius:10px;overflow:hidden;font-family:Arial,sans-serif;">
+      <div style="padding:20px;text-align:center;border-bottom:3px solid ${accent};">
+        <div style="font-size:18px;font-weight:700;color:#b8922e;">SAMSONS GROUP</div>
+        <div style="color:rgba(245,243,238,0.5);font-size:10px;margin-top:3px;letter-spacing:2px;">LOYALTY PROGRAMME</div>
+      </div>
+      <div style="padding:20px 24px;">
+        <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;">Subject: <span style="color:rgba(245,243,238,0.7);">${fillTags(subject)}</span></div>
+        <p style="color:#f5f3ee;font-size:14px;margin-bottom:10px;">${fillTags(greeting)}</p>
+        <p style="color:rgba(245,243,238,0.7);font-size:13px;line-height:1.7;margin-bottom:10px;">${fillTags(body).replace(/\n/g,'<br>')}</p>
+        <p style="color:rgba(245,243,238,0.45);font-size:12px;">${fillTags(closing)}</p>
+      </div>
+      <div style="padding:10px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+        <div style="color:rgba(245,243,238,0.25);font-size:10px;">Samsons Group of Companies | Malam Jabba, Swat, KPK</div>
+      </div>
+    </div>`;
+
+  document.getElementById('emailPreviewPane').innerHTML = preview;
+}
+
+async function saveEmailTemplate() {
+  const btn = document.getElementById('saveEmailBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>Saving...';
+  try {
+    const res = await api({
+      action:    'SAVE_EMAIL_TEMPLATE',
+      pin:       adminPIN,
+      emailType: currentEmailType,
+      subject:   document.getElementById('emailSubject').value,
+      greeting:  document.getElementById('emailGreeting').value,
+      emailBody: document.getElementById('emailBody').value,
+      closing:   document.getElementById('emailClosing').value,
+    });
+    btn.disabled = false; btn.textContent = 'Save Template';
+    if (res.ok) showAlert('emailsAlert','success', EMAIL_TYPE_LABELS[currentEmailType] + ' template saved successfully.');
+    else showAlert('emailsAlert','error', res.error);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Save Template';
+    showAlert('emailsAlert','error','Connection error.');
+  }
+}
+
+async function sendTestEmail() {
+  const btn = document.getElementById('testEmailBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="loader"></span>Sending...';
+  try {
+    // Save first so the test reflects current edits
+    await api({
+      action:    'SAVE_EMAIL_TEMPLATE',
+      pin:       adminPIN,
+      emailType: currentEmailType,
+      subject:   document.getElementById('emailSubject').value,
+      greeting:  document.getElementById('emailGreeting').value,
+      emailBody: document.getElementById('emailBody').value,
+      closing:   document.getElementById('emailClosing').value,
+    });
+    const res = await api({ action:'SEND_TEST_EMAIL', pin:adminPIN, emailType:currentEmailType });
+    btn.disabled = false; btn.textContent = 'Send Test to Me';
+    if (res.ok) showAlert('emailsAlert','success', res.message);
+    else showAlert('emailsAlert','error', res.error);
+  } catch(e) {
+    btn.disabled = false; btn.textContent = 'Send Test to Me';
+    showAlert('emailsAlert','error','Connection error.');
   }
 }
 
