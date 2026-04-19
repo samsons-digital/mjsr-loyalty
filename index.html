@@ -576,33 +576,34 @@
     <button class="btn btn-primary" onclick="enrollMember()" id="enrollBtn" style="width:100%; margin-top:6px;">Enroll Member</button>
   </div>
 
-  <!-- Tier Guide -->
+  <!-- Tier Guide — loaded dynamically from Config -->
   <div class="card">
     <div class="card-title">Loyalty Tier Guide</div>
-    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:10px;">
-      <div style="text-align:center; padding:16px; background:rgba(156,163,175,0.1); border:1px solid #9ca3af; border-radius:10px;">
+    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:10px;" id="enrollTierGuide">
+      <!-- Populated by loadEnrollTierGuide() -->
+      <div style="text-align:center;padding:16px;background:rgba(156,163,175,0.1);border:1px solid #9ca3af;border-radius:10px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#d1d5db;margin-bottom:6px;">Iron</div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#d1d5db;">New</div>
         <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:4px;">member</div>
-        <div style="font-size:13px;font-weight:600;color:#d1d5db;margin-top:8px;">10% one-time</div>
+        <div style="font-size:13px;font-weight:600;color:#d1d5db;margin-top:8px;" id="tgIronDisc">10% one-time</div>
       </div>
-      <div style="text-align:center; padding:16px; background:rgba(205,127,50,0.1); border:1px solid #cd7f32; border-radius:10px;">
+      <div style="text-align:center;padding:16px;background:rgba(205,127,50,0.1);border:1px solid #cd7f32;border-radius:10px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#e0a060;margin-bottom:6px;">Bronze</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#e0a060;">5,000</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#e0a060;" id="tgBronzeMin">5,000</div>
         <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:4px;">points</div>
-        <div style="font-size:13px;font-weight:600;color:#e0a060;margin-top:8px;">5% off</div>
+        <div style="font-size:13px;font-weight:600;color:#e0a060;margin-top:8px;" id="tgBronzeDisc">5% off</div>
       </div>
-      <div style="text-align:center; padding:16px; background:rgba(156,163,175,0.1); border:1px solid #9ca3af; border-radius:10px;">
+      <div style="text-align:center;padding:16px;background:rgba(156,163,175,0.1);border:1px solid #9ca3af;border-radius:10px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#d1d5db;margin-bottom:6px;">Silver</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#d1d5db;">15,000</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:#d1d5db;" id="tgSilverMin">15,000</div>
         <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:4px;">points</div>
-        <div style="font-size:13px;font-weight:600;color:#d1d5db;margin-top:8px;">15% off</div>
+        <div style="font-size:13px;font-weight:600;color:#d1d5db;margin-top:8px;" id="tgSilverDisc">10% off</div>
       </div>
-      <div style="text-align:center; padding:16px; background:rgba(184,146,46,0.1); border:1px solid var(--gold); border-radius:10px;">
+      <div style="text-align:center;padding:16px;background:rgba(184,146,46,0.1);border:1px solid var(--gold);border-radius:10px;">
         <div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gold-light);margin-bottom:6px;">Gold</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold-light);">35,000</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold-light);" id="tgGoldMin">35,000</div>
         <div style="font-size:11px;color:rgba(245,243,238,0.4);margin-top:4px;">points</div>
-        <div style="font-size:13px;font-weight:600;color:var(--gold-light);margin-top:8px;">25% off</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gold-light);margin-top:8px;" id="tgGoldDisc">15% off</div>
       </div>
     </div>
     <div style="margin-top:12px; font-size:12px; color:rgba(245,243,238,0.4); text-align:center;">
@@ -1098,6 +1099,7 @@ function showSection(name) {
 
   // Hide resort bar on dashboard/admin
   document.getElementById('resortBar').style.display = (name === 'dashboard' || name === 'admin') ? 'none' : 'flex';
+  if (name === 'enroll') loadEnrollTierGuide();
 }
 
 function setResort(r) {
@@ -1353,6 +1355,23 @@ async function submitVisit() {
   }
 }
 
+
+// ===== ENROLL TIER GUIDE — load live values from config =====
+async function loadEnrollTierGuide() {
+  try {
+    const res = await api({ action: 'GET_TIER_CONFIG' });
+    if (!res.ok) return;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('tgIronDisc',   (res.ironDiscount  || 10) + '% one-time');
+    set('tgBronzeMin',  Number(res.bronzeMin  || 5000).toLocaleString());
+    set('tgBronzeDisc', (res.bronzeDiscount || 5)  + '% off');
+    set('tgSilverMin',  Number(res.silverMin  || 15000).toLocaleString());
+    set('tgSilverDisc', (res.silverDiscount || 10) + '% off');
+    set('tgGoldMin',    Number(res.goldMin    || 35000).toLocaleString());
+    set('tgGoldDisc',   (res.goldDiscount   || 15) + '% off');
+  } catch(e) {}
+}
+
 // ===== ENROLL =====
 async function enrollMember() {
   const name  = document.getElementById('eName').value.trim();
@@ -1365,18 +1384,20 @@ async function enrollMember() {
   try {
     const res = await api({
       action: 'ENROLL', name, phone,
-      cnic: document.getElementById('eCNIC').value.trim(),
+      email:    document.getElementById('eEmail').value.trim(),
+      cnic:     document.getElementById('eCNIC').value.trim(),
       hometown: document.getElementById('eHometown').value.trim(),
       district: document.getElementById('eDistrict').value.trim(),
       province: document.getElementById('eProvince').value,
-      notes: document.getElementById('eNotes').value.trim(),
-      staff: document.getElementById('eStaff').value.trim()
+      notes:    document.getElementById('eNotes').value.trim(),
+      staff:    document.getElementById('eStaff').value.trim(),
+      resort:   activeResort
     });
 
     btn.disabled = false; btn.textContent = 'Enroll Member';
 
     if (res.ok) {
-      showAlert('enrollAlert', 'success', `Member enrolled! ID: ${res.memberID} — ${name} is now a Bronze member. Welcome code: ${res.signupCode}`);
+      showAlert('enrollAlert', 'success', `Member enrolled! ID: ${res.memberID} — ${name} is now an Iron member. Iron discount code: ${res.ironCode || res.signupCode || 'See welcome email'}`);
       ['eName','ePhone','eEmail','eCNIC','eHometown','eDistrict','eNotes','eStaff'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('eProvince').value = '';
     } else {
@@ -2230,6 +2251,7 @@ async function saveMemberEdit() {
 
 // init
 buildActivities();
+loadEnrollTierGuide();
 initQRCodes();
 </script>
 </body>
